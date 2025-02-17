@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%; /* Changed to black */
+    --foreground: 0 0% 98%;
+    --card: 240 20% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 20% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 252 100% 69%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 30% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 20% 14.9%;
+    --muted-foreground: 240 10% 63.9%;
+    --accent: 240 20% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 20% 14.9%;
+    --input: 240 20% 14.9%;
+    --ring: 252 100% 69%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-secondary/30 backdrop-blur-md border border-white/10;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:border-purple-500/50;
+  }
+}
