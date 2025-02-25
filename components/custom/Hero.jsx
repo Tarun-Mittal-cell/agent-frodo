@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import { MessagesContext } from "@/context/MessagesContext";
 import { UserDetailContext } from "@/context/UserDetailContext";
 import Lookup from "@/data/Lookup";
@@ -12,6 +12,7 @@ import {
   Zap,
   Package,
   ChevronDown,
+  Rocket,
 } from "lucide-react";
 import SignInDialog from "./SignInDialog";
 import { useMutation } from "convex/react";
@@ -73,57 +74,42 @@ function Hero() {
     setIsLoading(true);
 
     try {
-      // Detect what capabilities are needed
-      const needsWebBrowsing =
-        input.toLowerCase().includes("browse") ||
-        input.toLowerCase().includes("search");
-      const needsAPI =
-        input.toLowerCase().includes("api") ||
-        input.toLowerCase().includes("data");
-      const needsDependencies =
-        input.toLowerCase().includes("install") ||
-        input.toLowerCase().includes("dependency");
-
-      // Enhance the prompt with UI instructions
+      // Enhance the prompt for stunning UI generation
       let enhancedPrompt = input;
       enhancedPrompt +=
-        "\n\nAdditional requirements: Create a modern, visually stunning UI with glass morphism effects, gradients, and subtle animations. Use reliable Unsplash image URLs and ensure all images load correctly. Make the design production-ready and error-free.";
+        "\n\nGenerate an extraordinary, production-ready website with these specific requirements:\n" +
+        "- Create a visually stunning UI with advanced glass morphism effects\n" +
+        "- Use radial and conic gradients for modern, eye-catching backgrounds\n" +
+        "- Implement subtle micro-animations for interactive elements\n" +
+        "- Use reliable Unsplash image URLs with proper loading attributes\n" +
+        "- Ensure full mobile responsiveness with tailored layouts for all devices\n" +
+        "- Apply futuristic design principles inspired by SpaceX and Tesla interfaces\n" +
+        "- Use proper typography hierarchy with dramatic font scaling\n" +
+        "- Implement dark mode by default with light mode toggle\n" +
+        "- Add subtle parallax effects for depth and immersion\n" +
+        "- Use asymmetrical layouts and dynamic spacing\n" +
+        "- Add optimized loading states and skeleton screens";
 
       // Show toast notifications for capabilities
-      if (needsWebBrowsing && capabilities[0].active) {
-        toast.info("Web browsing activated", {
-          icon: <Globe className="w-4 h-4" />,
+      if (capabilities[0].active) {
+        toast("Web browsing capability activated", {
+          icon: <Globe className="text-blue-400" />,
         });
       }
 
-      if (needsAPI && capabilities[1].active) {
-        toast.info("API integration activated", {
-          icon: <Code className="w-4 h-4" />,
-        });
-      }
-
-      if (needsDependencies && capabilities[2].active) {
-        toast.info("Dependency management activated", {
-          icon: <Package className="w-4 h-4" />,
-        });
-      }
-
-      // Prepare the message
       const msg = {
         role: "user",
         content: enhancedPrompt,
       };
 
-      // Update the messages context
       setMessages(msg);
 
-      // Create workspace - FIXED: removed metadata field
+      // Create workspace - Fixed: removed metadata field
       const workspaceId = await CreateWorkspace({
         user: userDetail._id,
         messages: [msg],
       });
 
-      // Navigate to workspace
       router.push("/workspace/" + workspaceId);
     } catch (error) {
       console.error("Generation error:", error);
@@ -144,51 +130,39 @@ function Hero() {
 
   return (
     <div className="min-h-[90vh] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Optimized background with gradient overlay */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-900 via-indigo-950/90 to-slate-900 overflow-hidden">
-        {/* Subtle grid pattern for texture */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath fill-rule='evenodd' d='M0 0h20v20H0V0zm1 1h18v18H1V1z'/%3E%3C/g%3E%3C/svg%3E\")",
-            backgroundSize: "20px 20px",
-          }}
-        />
+      {/* Beautiful, static gradient background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-indigo-950/90 to-black">
+          {/* Subtle noise texture overlay */}
+          <div
+            className="absolute inset-0 opacity-5"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+              backgroundSize: "cover",
+            }}
+          />
+        </div>
       </div>
 
-      {/* Enhanced orbs with improved aesthetics */}
-      <div className="orb-container">
+      {/* Beautiful Static Orbs */}
+      <div className="orbs-container pointer-events-none">
+        {/* Main orbs with perfect positioning and subtle glow */}
         <div className="orb orb-blue"></div>
         <div className="orb orb-purple"></div>
         <div className="orb orb-pink"></div>
         <div className="orb orb-cyan"></div>
-        <div className="orb orb-green"></div>
-        {/* Star-like particles */}
-        <div className="stars">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div
-              key={i}
-              className="star"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                width: `${Math.random() * 2 + 1}px`,
-                height: `${Math.random() * 2 + 1}px`,
-              }}
-            ></div>
-          ))}
-        </div>
+
+        {/* Decorative elements */}
+        <div className="static-ring"></div>
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center max-w-3xl w-full space-y-6 z-10 animate-fade-in">
+      <div className="flex flex-col items-center max-w-3xl w-full space-y-8 z-10">
         {/* Logo and Title */}
         <div className="flex items-center space-x-3 mb-2">
           <div className="relative">
             <div className="absolute inset-0 bg-blue-500/30 rounded-full blur-md"></div>
-            <Command className="w-10 h-10 text-blue-400 relative z-10" />
+            <Rocket className="w-10 h-10 text-blue-400 relative z-10" />
           </div>
           <h1 className="text-3xl font-bold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-violet-500">
             FRODO
@@ -196,13 +170,13 @@ function Hero() {
         </div>
 
         {/* Hero Text */}
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center animate-fade-in-up">
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center fade-in-up">
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500">
             {Lookup.HERO_HEADING}
           </span>
         </h2>
 
-        <p className="text-xl text-slate-300 text-center max-w-xl animate-fade-in-up-delayed">
+        <p className="text-xl text-slate-300 text-center max-w-xl fade-in-up-delayed">
           {Lookup.HERO_DESC}
         </p>
 
@@ -212,10 +186,10 @@ function Hero() {
             <button
               key={index}
               onClick={() => toggleCapability(index)}
-              className={`px-4 py-2 rounded-lg border transition-all duration-300 flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${
                 capability.active
-                  ? "backdrop-blur-md bg-blue-500/20 text-blue-300 border-blue-500/40 shadow-lg shadow-blue-500/10"
-                  : "bg-slate-800/50 text-slate-400 border-slate-700/50 hover:bg-slate-700/50"
+                  ? "backdrop-blur-md bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-lg shadow-blue-500/10"
+                  : "bg-slate-800/50 text-slate-400 border border-slate-700/50 hover:bg-slate-700/50"
               }`}
             >
               {capability.icon}
@@ -230,7 +204,7 @@ function Hero() {
         </div>
 
         {/* Input Area */}
-        <div className="w-full max-w-2xl animate-fade-in-up">
+        <div className="w-full max-w-2xl fade-in-up">
           <div
             className={`backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4 transition-all duration-300 ${
               isExpanded
@@ -240,7 +214,7 @@ function Hero() {
           >
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2 px-2">
-                <span className="text-slate-500 text-sm">Frodo</span>
+                <span className="text-slate-500 text-sm">Frodo AI</span>
                 <div className="h-4 w-px bg-slate-700/50"></div>
                 <div className="flex space-x-1">
                   {capabilities
@@ -274,13 +248,14 @@ function Hero() {
               />
 
               {isExpanded && (
-                <div className="flex justify-between pt-2 border-t border-slate-700/50 animate-fade-in">
+                <div className="flex justify-between pt-2 border-t border-slate-700/50 fade-in">
                   <div className="text-xs text-slate-500">
                     Available tokens: {userDetail?.token || 0}
                   </div>
 
-                  <div className="text-xs text-slate-500">
-                    {userInput.length} characters
+                  <div className="text-xs text-blue-400">
+                    {capabilities.filter((c) => c.active).length} capabilities
+                    active
                   </div>
                 </div>
               )}
@@ -289,7 +264,7 @@ function Hero() {
 
           {/* Generate Button */}
           {userInput?.length > 0 && (
-            <div className="flex justify-end mt-4 animate-fade-in">
+            <div className="flex justify-end mt-4 fade-in">
               <button
                 onClick={() => onGenerate(userInput)}
                 disabled={isLoading}
@@ -352,10 +327,10 @@ function Hero() {
         closeDialog={(v) => setOpenDialog(v)}
       />
 
-      {/* CSS for optimized animations and orbs */}
+      {/* CSS for static orbs and animations */}
       <style jsx global>{`
-        /* Optimized Orbs */
-        .orb-container {
+        /* Beautiful Static Orbs */
+        .orbs-container {
           position: absolute;
           width: 100%;
           height: 100%;
@@ -363,165 +338,103 @@ function Hero() {
           z-index: 1;
         }
 
+        /* Large, beautiful orbs with fixed positioning */
         .orb {
           position: absolute;
           border-radius: 50%;
-          filter: blur(80px);
+          filter: blur(70px);
           opacity: 0.6;
-          will-change: transform;
         }
 
         .orb-blue {
-          width: 350px;
-          height: 350px;
+          width: 600px;
+          height: 600px;
+          top: -100px;
+          right: -100px;
           background: radial-gradient(
             circle,
             rgba(59, 130, 246, 0.5) 0%,
-            rgba(37, 99, 235, 0.1) 70%
+            rgba(37, 99, 235, 0.2) 30%,
+            transparent 70%
           );
-          top: 10%;
-          right: 15%;
-          animation: floatOrb1 15s ease-in-out infinite;
         }
 
         .orb-purple {
-          width: 450px;
-          height: 450px;
+          width: 500px;
+          height: 500px;
+          bottom: -100px;
+          left: -100px;
           background: radial-gradient(
             circle,
             rgba(139, 92, 246, 0.5) 0%,
-            rgba(124, 58, 237, 0.1) 70%
+            rgba(124, 58, 237, 0.2) 40%,
+            transparent 70%
           );
-          bottom: 5%;
-          left: 5%;
-          animation: floatOrb2 18s ease-in-out infinite;
         }
 
         .orb-pink {
-          width: 250px;
-          height: 250px;
+          width: 300px;
+          height: 300px;
+          top: 20%;
+          left: 10%;
           background: radial-gradient(
             circle,
             rgba(236, 72, 153, 0.4) 0%,
-            rgba(219, 39, 119, 0.1) 70%
+            rgba(219, 39, 119, 0.1) 60%,
+            transparent 70%
           );
-          top: 30%;
-          left: 20%;
-          animation: floatOrb3 12s ease-in-out infinite;
         }
 
         .orb-cyan {
-          width: 300px;
-          height: 300px;
-          background: radial-gradient(
-            circle,
-            rgba(34, 211, 238, 0.3) 0%,
-            rgba(6, 182, 212, 0.1) 70%
-          );
+          width: 350px;
+          height: 350px;
           bottom: 30%;
-          right: 20%;
-          animation: floatOrb4 20s ease-in-out infinite;
-        }
-
-        .orb-green {
-          width: 200px;
-          height: 200px;
+          right: 10%;
           background: radial-gradient(
             circle,
-            rgba(16, 185, 129, 0.3) 0%,
-            rgba(5, 150, 105, 0.1) 70%
+            rgba(6, 182, 212, 0.4) 0%,
+            rgba(14, 165, 233, 0.1) 50%,
+            transparent 70%
           );
-          top: 65%;
-          right: 30%;
-          animation: floatOrb5 14s ease-in-out infinite;
         }
 
-        /* Star-like particles */
-        .stars {
+        /* Decorative ring */
+        .static-ring {
           position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-
-        .star {
-          position: absolute;
-          background-color: rgba(255, 255, 255, 0.8);
+          width: 800px;
+          height: 800px;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
           border-radius: 50%;
-          animation: twinkle 5s ease-in-out infinite;
+          border: 1px solid rgba(59, 130, 246, 0.1);
+          box-shadow:
+            0 0 50px rgba(59, 130, 246, 0.05),
+            inset 0 0 30px rgba(59, 130, 246, 0.05);
+          opacity: 0.6;
         }
 
-        @keyframes twinkle {
-          0%,
-          100% {
-            opacity: 0.2;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.7;
-            transform: scale(1.5);
-          }
+        /* Elegant fade-in animations */
+        .fade-in {
+          opacity: 0;
+          animation: fadeIn 0.8s ease-out forwards;
         }
 
-        @keyframes floatOrb1 {
-          0%,
-          100% {
-            transform: translate(0, 0) scale(1);
-          }
-          50% {
-            transform: translate(-30px, 30px) scale(1.1);
-          }
+        .fade-in-up {
+          opacity: 0;
+          animation: fadeInUp 0.8s ease-out forwards;
         }
 
-        @keyframes floatOrb2 {
-          0%,
-          100% {
-            transform: translate(0, 0) scale(1);
-          }
-          50% {
-            transform: translate(40px, -20px) scale(1.08);
-          }
+        .fade-in-up-delayed {
+          opacity: 0;
+          animation: fadeInUp 0.8s ease-out 0.2s forwards;
         }
 
-        @keyframes floatOrb3 {
-          0%,
-          100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(20px, 20px) scale(1.05);
-          }
-          66% {
-            transform: translate(-20px, 10px) scale(1.05);
-          }
+        .staggered-item {
+          opacity: 0;
+          animation: fadeIn 0.5s ease-out forwards;
         }
 
-        @keyframes floatOrb4 {
-          0%,
-          100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(-15px, -25px) scale(1.03);
-          }
-          66% {
-            transform: translate(20px, 15px) scale(1.03);
-          }
-        }
-
-        @keyframes floatOrb5 {
-          0%,
-          100% {
-            transform: translate(0, 0) scale(1);
-          }
-          25% {
-            transform: translate(10px, -15px) scale(1.02);
-          }
-          75% {
-            transform: translate(-10px, 15px) scale(1.02);
-          }
-        }
-
-        /* Fade In Animations */
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -542,22 +455,24 @@ function Hero() {
           }
         }
 
-        .animate-fade-in {
-          animation: fadeIn 0.6s ease-out forwards;
-        }
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+          .orb-blue {
+            width: 400px;
+            height: 400px;
+            right: -200px;
+          }
 
-        .animate-fade-in-up {
-          animation: fadeInUp 0.7s ease-out forwards;
-        }
+          .orb-purple {
+            width: 350px;
+            height: 350px;
+            left: -150px;
+          }
 
-        .animate-fade-in-up-delayed {
-          animation: fadeInUp 0.7s ease-out 0.2s forwards;
-          opacity: 0;
-        }
-
-        .staggered-item {
-          opacity: 0;
-          animation: fadeIn 0.5s ease-out forwards;
+          .static-ring {
+            width: 500px;
+            height: 500px;
+          }
         }
       `}</style>
     </div>
