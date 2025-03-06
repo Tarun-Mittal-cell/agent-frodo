@@ -1,106 +1,19 @@
 // next.config.mjs
 const nextConfig = {
   images: {
-    // Using only remotePatterns to avoid deprecation warnings
+    domains: [
+      // Fallback option for any domains that might be missed in remotePatterns
+    ],
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "images.unsplash.com",
+        hostname: "**",
         pathname: "/**",
       },
+      // This is a wildcard pattern that allows ALL domains - critical for image generation
       {
-        protocol: "https",
-        hostname: "images.pexels.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "**.unsplash.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "via.placeholder.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "placeimg.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "placeholder.pics",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "placekitten.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "loremflickr.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "dummyimage.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "placecage.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "baconmockup.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "placebear.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "placepuppy.it",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "archive.org",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "picsum.photos",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "source.boringavatars.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "randomuser.me",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "ui-avatars.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
+        protocol: "http",
+        hostname: "**",
         pathname: "/**",
       },
     ],
@@ -115,15 +28,18 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Disable the unoptimized option to ensure all images go through optimization
+    unoptimized: false,
   },
   // Performance optimizations
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
   experimental: {
-    // Improved loading for images
-    optimizeServerReact: true,
+    // Only include stable experimental features
     scrollRestoration: true,
+    // Remove potentially problematic experimental features
+    // optimizeServerReact: true, // This might cause issues in newer Next.js versions
   },
   // Add custom headers to improve security and performance
   async headers() {
@@ -161,9 +77,41 @@ const nextConfig = {
     // Increase size limit for images
     config.performance = {
       ...config.performance,
-      maxAssetSize: 1024 * 1024, // 1MB
-      maxEntrypointSize: 1024 * 1024, // 1MB
+      maxAssetSize: 2 * 1024 * 1024, // 2MB - increased from 1MB
+      maxEntrypointSize: 2 * 1024 * 1024, // 2MB - increased from 1MB
     };
+
+    // Optimize asset loading
+    if (config.module) {
+      config.module.rules.push({
+        test: /\.(jpe?g|png|svg|gif|webp|avif)$/i,
+        use: [
+          {
+            loader: "image-webpack-loader",
+            options: {
+              mozjpeg: {
+                progressive: true,
+                quality: 80,
+              },
+              optipng: {
+                enabled: true,
+              },
+              pngquant: {
+                quality: [0.65, 0.9],
+                speed: 4,
+              },
+              gifsicle: {
+                interlaced: false,
+              },
+              webp: {
+                quality: 80,
+              },
+            },
+          },
+        ],
+      });
+    }
+
     return config;
   },
 };
