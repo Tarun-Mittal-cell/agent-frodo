@@ -1,0 +1,25 @@
+{
+  "type": "generate_code",
+  "stepId": "step-2",
+  "planId": "plan-rev-1740527477193-cpkofe3d3",
+  "description": "Create a new Counter functional component that uses the useState hook to manage the counter value state.",
+  "codeRequirements": {
+    "step": {
+      "id": "step-2",
+      "title": "Create Counter component",
+      "description": "Create a new Counter functional component that uses the useState hook to manage the counter value state.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "planContext": "Create a simple React functional component that implements a counter with increment, decrement, and reset buttons. The counter value should be styled red when negative and green when positive using CSS modules.",
+    "projectStructure": {},
+    "existingCode": [],
+    "dependencies": []
+  },
+  "id": "action-1740527525055-ufuvakak0",
+  "timestamp": "2025-02-25T23:52:05.055Z"
+}

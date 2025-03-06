@@ -1,0 +1,10 @@
+{
+  "description": "Create a simple React counter component with increment and decrement buttons",
+  "requirements": "\n      - Use React functional component with hooks\n      - Include increment and decrement buttons\n      - Style with CSS modules\n      - Add a reset button\n      - Make the counter display red when negative, green when positive\n      - Add basic documentation\n    ",
+  "id": "task-1740522345656-z0agcbtd8",
+  "status": "failed",
+  "createdAt": "2025-02-25T22:25:45.656Z",
+  "updatedAt": "2025-02-25T22:25:47.809Z",
+  "startedAt": "2025-02-25T22:25:45.657Z",
+  "error": "Failed to create initial plan: LLM completion failed: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors."
+}

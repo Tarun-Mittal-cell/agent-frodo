@@ -1,0 +1,11 @@
+{
+  "needsPlanRevision": true,
+  "needsResearch": false,
+  "insights": [
+    "Action failed: Unblock plan action failed: Failed to parse unblock plan response: Unexpected token 'H', \"Here is th\"... is not valid JSON"
+  ],
+  "recommendation": "Revise plan to handle the failed action",
+  "confidence": "low",
+  "id": "reflection-1740523512794-3qls89t8v",
+  "timestamp": "2025-02-25T22:45:12.794Z"
+}

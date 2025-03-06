@@ -1,0 +1,39 @@
+{
+  "type": "generate_code",
+  "stepId": "step-3",
+  "planId": "plan-1740541272016-xnvityy7c",
+  "description": "Add two buttons to the Counter component, one for incrementing and one for decrementing the counter value. Update the counter state when the buttons are clicked.",
+  "codeRequirements": {
+    "step": {
+      "id": "step-3",
+      "title": "Add increment and decrement buttons",
+      "description": "Add two buttons to the Counter component, one for incrementing and one for decrementing the counter value. Update the counter state when the buttons are clicked.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "planContext": "Create a simple React counter component with increment and decrement buttons. The component will be a functional component using hooks, styled with CSS modules. It will include a reset button and conditionally style the counter display based on its value (red when negative, green when positive). Basic documentation will also be added.",
+    "projectStructure": {},
+    "existingCode": [],
+    "dependencies": [
+      {
+        "id": "step-2",
+        "title": "Create Counter component",
+        "description": "Create a new functional component called Counter. Use the useState hook to manage the counter state.",
+        "type": "implementation",
+        "dependencies": [],
+        "estimatedComplexity": "low",
+        "status": "completed",
+        "startedAt": null,
+        "completedAt": "2025-02-26T03:43:02.735Z"
+      }
+    ]
+  },
+  "id": "action-1740541405104-6eyrumhrm",
+  "timestamp": "2025-02-26T03:43:25.102Z"
+}

@@ -1,0 +1,106 @@
+{
+  "id": "result-1740528220515-80aj07gjc",
+  "actionId": "action-1740528220518-fdfwjdkwo",
+  "result": {
+    "status": "success",
+    "result": {
+      "status": "success",
+      "unblockPlan": {
+        "analysis": "The blocked steps all depend on step-2, which is not listed as a blocked step itself. This implies that step-2 is missing from the plan altogether. Without step-2, steps 3, 4, 5, and 7 cannot be completed. Step-6 is blocked because it depends on steps 3 and 5, which are blocked due to the missing step-2.",
+        "rootCause": "Step-2 is missing from the plan, causing a cascade of blocked steps that depend on it directly or indirectly.",
+        "solution": "Add step-2 to the plan and ensure it is completed before the dependent steps. Review the plan to ensure that step-2 contains the necessary actions to unblock the dependent steps.",
+        "stepChanges": [
+          {
+            "stepId": "step-2",
+            "recommendedAction": "modify",
+            "details": "Add step-2 to the plan and ensure it includes the necessary actions to unblock the dependent steps."
+          },
+          {
+            "stepId": "step-3",
+            "recommendedAction": "reorder",
+            "details": "Move step-3 after step-2 in the plan order."
+          },
+          {
+            "stepId": "step-4",
+            "recommendedAction": "reorder",
+            "details": "Move step-4 after step-2 in the plan order."
+          },
+          {
+            "stepId": "step-5",
+            "recommendedAction": "reorder",
+            "details": "Move step-5 after step-2 in the plan order."
+          },
+          {
+            "stepId": "step-6",
+            "recommendedAction": "reorder",
+            "details": "Move step-6 after steps 3 and 5 in the plan order."
+          },
+          {
+            "stepId": "step-7",
+            "recommendedAction": "reorder",
+            "details": "Move step-7 after steps 2, 3, 4, and 5 in the plan order."
+          }
+        ]
+      }
+    },
+    "action": {
+      "type": "unblock_plan",
+      "planId": "plan-rev-1740527572133-5cjv5otwk",
+      "description": "Resolve dependency issues in the plan",
+      "blockedStepDetails": [
+        {
+          "stepId": "step-3",
+          "missingDependencies": [
+            "step-2"
+          ]
+        },
+        {
+          "stepId": "step-4",
+          "missingDependencies": [
+            "step-2"
+          ]
+        },
+        {
+          "stepId": "step-5",
+          "missingDependencies": [
+            "step-2"
+          ]
+        },
+        {
+          "stepId": "step-6",
+          "missingDependencies": [
+            "step-3",
+            "step-5"
+          ]
+        },
+        {
+          "stepId": "step-7",
+          "missingDependencies": [
+            "step-2",
+            "step-3",
+            "step-4",
+            "step-5"
+          ]
+        }
+      ],
+      "planContext": {
+        "planDescription": "Create a simple React functional component that implements a counter with increment, decrement, and reset buttons. The counter value should be styled red when negative and green when positive using CSS modules.",
+        "currentState": {
+          "timestamp": "2025-02-26T00:03:21.562Z",
+          "projectStructure": null,
+          "relevantCode": [],
+          "currentPlan": {
+            "id": "plan-rev-1740527572133-5cjv5otwk",
+            "progress": 0,
+            "completedSteps": 0,
+            "pendingSteps": 5,
+            "currentStep": null
+          },
+          "systemInfo": {},
+          "screenshot": null
+        }
+      }
+    }
+  },
+  "timestamp": "2025-02-26T00:03:40.515Z"
+}

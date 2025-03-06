@@ -1,0 +1,10 @@
+{
+  "description": "Create a simple React counter component with increment and decrement buttons",
+  "requirements": "\n      - Use React functional component with hooks\n      - Include increment and decrement buttons\n      - Style with CSS modules\n      - Add a reset button\n      - Make the counter display red when negative, green when positive\n      - Add basic documentation\n    ",
+  "id": "task-1740522898243-epykaygfv",
+  "status": "failed",
+  "createdAt": "2025-02-25T22:34:58.243Z",
+  "updatedAt": "2025-02-25T22:35:24.605Z",
+  "startedAt": "2025-02-25T22:34:58.249Z",
+  "error": "Failed to create initial plan: Failed to parse plan response: Unexpected token 'H', \"Here is th\"... is not valid JSON"
+}

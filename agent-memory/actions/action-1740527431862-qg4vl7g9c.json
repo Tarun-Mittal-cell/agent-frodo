@@ -1,0 +1,25 @@
+{
+  "type": "generate_code",
+  "stepId": "step-1",
+  "planId": "plan-1740527383246-7fbyxd7fz",
+  "description": "Create a new React project using create-react-app. Remove unused boilerplate files.",
+  "codeRequirements": {
+    "step": {
+      "id": "step-1",
+      "title": "Set up project",
+      "description": "Create a new React project using create-react-app. Remove unused boilerplate files.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "planContext": "Create a simple React functional component that implements a counter with increment, decrement, and reset buttons. The counter value should be styled red when negative and green when positive using CSS modules.",
+    "projectStructure": {},
+    "existingCode": [],
+    "dependencies": []
+  },
+  "id": "action-1740527431862-qg4vl7g9c",
+  "timestamp": "2025-02-25T23:50:31.860Z"
+}

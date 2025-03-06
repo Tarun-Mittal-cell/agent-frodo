@@ -1,6 +1,6 @@
 # Dumpling Enhancement Implementation Guide
 
-This guide will help you implement the enhanced UI generation and autonomous features in your Dumpling project.
+This guide will help you implement the enhanced UI generation and autonomous features in your Frodo's project.
 
 ## Overview of New Features
 

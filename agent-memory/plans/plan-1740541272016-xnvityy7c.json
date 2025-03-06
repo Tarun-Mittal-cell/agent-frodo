@@ -1,0 +1,121 @@
+{
+  "id": "plan-1740541272016-xnvityy7c",
+  "taskId": "task-1740541244917-19n439mxo",
+  "previousPlanId": null,
+  "title": "React Counter Component",
+  "description": "Create a simple React counter component with increment and decrement buttons. The component will be a functional component using hooks, styled with CSS modules. It will include a reset button and conditionally style the counter display based on its value (red when negative, green when positive). Basic documentation will also be added.",
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "Set up project",
+      "description": "Create a new React project using Create React App. Remove unnecessary boilerplate files and code.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "low",
+      "status": "completed",
+      "startedAt": null,
+      "completedAt": "2025-02-26T03:42:07.435Z"
+    },
+    {
+      "id": "step-2",
+      "title": "Create Counter component",
+      "description": "Create a new functional component called Counter. Use the useState hook to manage the counter state.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "low",
+      "status": "completed",
+      "startedAt": null,
+      "completedAt": "2025-02-26T03:43:02.735Z"
+    },
+    {
+      "id": "step-3",
+      "title": "Add increment and decrement buttons",
+      "description": "Add two buttons to the Counter component, one for incrementing and one for decrementing the counter value. Update the counter state when the buttons are clicked.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-4",
+      "title": "Style with CSS modules",
+      "description": "Create a CSS module for the Counter component. Style the buttons and counter display.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-5",
+      "title": "Add reset button",
+      "description": "Add a reset button to the Counter component that sets the counter value back to 0 when clicked.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-6",
+      "title": "Conditionally style counter display",
+      "description": "Update the counter display styling based on the counter value. Display the value in red when negative and green when positive.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2",
+        "step-4"
+      ],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-7",
+      "title": "Add documentation",
+      "description": "Write basic documentation for the Counter component, including a description of its functionality and how to use it.",
+      "type": "documentation",
+      "dependencies": [
+        "step-2",
+        "step-3",
+        "step-5",
+        "step-6"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-8",
+      "title": "Test Counter component",
+      "description": "Write unit tests for the Counter component to ensure it functions as expected.",
+      "type": "testing",
+      "dependencies": [
+        "step-2",
+        "step-3",
+        "step-5",
+        "step-6"
+      ],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    }
+  ],
+  "createdAt": "2025-02-26T03:41:12.017Z",
+  "updatedAt": "2025-02-26T03:43:02.735Z",
+  "status": "active",
+  "progress": 25,
+  "revisionReason": null
+}

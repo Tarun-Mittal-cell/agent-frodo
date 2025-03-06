@@ -1,0 +1,10 @@
+{
+  "description": "Create a simple React counter component with increment and decrement buttons",
+  "requirements": "\n      - Use React functional component with hooks\n      - Include increment and decrement buttons\n      - Style with CSS modules\n      - Add a reset button\n      - Make the counter display red when negative, green when positive\n      - Add basic documentation\n    ",
+  "id": "task-1740522531902-rhqom3cok",
+  "status": "failed",
+  "createdAt": "2025-02-25T22:28:51.902Z",
+  "updatedAt": "2025-02-25T22:28:52.155Z",
+  "startedAt": "2025-02-25T22:28:51.903Z",
+  "error": "Failed to create initial plan: LLM completion failed: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"}}"
+}

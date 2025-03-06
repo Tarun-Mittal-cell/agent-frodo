@@ -1,0 +1,160 @@
+{
+  "id": "plan-emergency-1740530042859-y0h0mgb1x",
+  "taskId": "task-1740528333990-7346q2f2t",
+  "previousPlanId": "plan-emergency-1740530042588-7w77c3htm",
+  "title": "React Counter Component",
+  "description": "Create a simple React counter component with increment and decrement buttons. The component will be a functional component using hooks, styled with CSS modules. It will include a reset button and conditionally style the counter display based on its value (red when negative, green when positive). Basic documentation will also be added.",
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "Set up project",
+      "description": "Create a new React project using Create React App. Remove unnecessary boilerplate files and code. Create a basic folder structure for the Counter component.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "low",
+      "status": "blocked",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-2",
+      "title": "Create Counter component",
+      "description": "Create a new functional component called Counter. Use the useState hook to manage the counter state.",
+      "type": "implementation",
+      "dependencies": [
+        "step-1"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-3",
+      "title": "Implement increment and decrement buttons",
+      "description": "Add increment and decrement buttons to the Counter component. Use the onClick event to update the counter state accordingly.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-4",
+      "title": "Add reset button",
+      "description": "Implement a reset button that sets the counter state back to 0 when clicked.",
+      "type": "implementation",
+      "dependencies": [
+        "step-3"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-5",
+      "title": "Style Counter component with CSS modules",
+      "description": "Create a CSS module for the Counter component. Style the counter display, increment, decrement, and reset buttons.",
+      "type": "implementation",
+      "dependencies": [
+        "step-4"
+      ],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-6",
+      "title": "Conditionally style counter display",
+      "description": "Update the counter display styling based on its value. Use the className property to conditionally apply CSS classes for negative (red) and positive (green) values.",
+      "type": "implementation",
+      "dependencies": [
+        "step-5"
+      ],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-8",
+      "title": "Test Counter component",
+      "description": "Write unit tests for the Counter component to ensure it functions as expected. Test increment, decrement, reset functionality, and conditional styling.",
+      "type": "testing",
+      "dependencies": [
+        "step-6"
+      ],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-7",
+      "title": "Add documentation",
+      "description": "Create a README file with basic documentation on how to use and customize the Counter component.",
+      "type": "documentation",
+      "dependencies": [
+        "step-8"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-emergency-1740530041987",
+      "title": "Fix error in previous step",
+      "description": "Address error: LLM completion failed: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"}}",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "medium",
+      "status": "blocked",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-emergency-1740530042298",
+      "title": "Fix error in previous step",
+      "description": "Address error: LLM completion failed: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"}}",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "medium",
+      "status": "blocked",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-emergency-1740530042588",
+      "title": "Fix error in previous step",
+      "description": "Address error: LLM completion failed: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"}}",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "medium",
+      "status": "blocked",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-emergency-1740530042859",
+      "title": "Fix error in previous step",
+      "description": "Address error: LLM completion failed: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"}}",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    }
+  ],
+  "createdAt": "2025-02-26T00:34:02.859Z",
+  "updatedAt": "2025-02-26T00:34:02.859Z",
+  "status": "active",
+  "progress": 0,
+  "revisionReason": "Emergency revision due to error: LLM completion failed: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"}}"
+}

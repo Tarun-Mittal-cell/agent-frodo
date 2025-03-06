@@ -1,0 +1,96 @@
+{
+  "id": "result-1740527799917-97nbzcd7a",
+  "actionId": "action-1740527799917-9iaytwkz0",
+  "result": {
+    "status": "success",
+    "result": {
+      "status": "success",
+      "unblockPlan": {
+        "analysis": "The blocked steps all depend on step-2, which is not present in the plan. Step-6 also depends on steps 3 and 5, while step-7 depends on steps 2, 3, 4, and 5. Without step-2, the other steps cannot be completed, causing the dependency issues.",
+        "rootCause": "The root cause is the absence of step-2 in the plan. This step is likely a crucial prerequisite for the other steps, such as setting up the project or defining the component structure.",
+        "solution": "To unblock the plan, step-2 needs to be added and completed before the dependent steps can proceed. The plan should be updated to include step-2 and ensure it is executed first.",
+        "stepChanges": [
+          {
+            "stepId": "step-2",
+            "recommendedAction": "split",
+            "details": "Create step-2 to set up the project and define the component structure. This step should be completed before steps 3, 4, and 5."
+          },
+          {
+            "stepId": "step-3",
+            "recommendedAction": "reorder",
+            "details": "Move step-3 after the newly created step-2 to resolve its dependency."
+          },
+          {
+            "stepId": "step-4",
+            "recommendedAction": "reorder",
+            "details": "Move step-4 after the newly created step-2 to resolve its dependency."
+          },
+          {
+            "stepId": "step-5",
+            "recommendedAction": "reorder",
+            "details": "Move step-5 after the newly created step-2 to resolve its dependency."
+          }
+        ]
+      }
+    },
+    "action": {
+      "type": "unblock_plan",
+      "planId": "plan-rev-1740527572133-5cjv5otwk",
+      "description": "Resolve dependency issues in the plan",
+      "blockedStepDetails": [
+        {
+          "stepId": "step-3",
+          "missingDependencies": [
+            "step-2"
+          ]
+        },
+        {
+          "stepId": "step-4",
+          "missingDependencies": [
+            "step-2"
+          ]
+        },
+        {
+          "stepId": "step-5",
+          "missingDependencies": [
+            "step-2"
+          ]
+        },
+        {
+          "stepId": "step-6",
+          "missingDependencies": [
+            "step-3",
+            "step-5"
+          ]
+        },
+        {
+          "stepId": "step-7",
+          "missingDependencies": [
+            "step-2",
+            "step-3",
+            "step-4",
+            "step-5"
+          ]
+        }
+      ],
+      "planContext": {
+        "planDescription": "Create a simple React functional component that implements a counter with increment, decrement, and reset buttons. The counter value should be styled red when negative and green when positive using CSS modules.",
+        "currentState": {
+          "timestamp": "2025-02-25T23:56:26.088Z",
+          "projectStructure": null,
+          "relevantCode": [],
+          "currentPlan": {
+            "id": "plan-rev-1740527572133-5cjv5otwk",
+            "progress": 0,
+            "completedSteps": 0,
+            "pendingSteps": 5,
+            "currentStep": null
+          },
+          "systemInfo": {},
+          "screenshot": null
+        }
+      }
+    }
+  },
+  "timestamp": "2025-02-25T23:56:39.917Z"
+}
