@@ -1,0 +1,25 @@
+{
+  "type": "generate_code",
+  "stepId": "step-emergency-1740530060830",
+  "planId": "plan-emergency-1740530060830-x8g3snyy0",
+  "description": "Address error: LLM completion failed: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"}}",
+  "codeRequirements": {
+    "step": {
+      "id": "step-emergency-1740530060830",
+      "title": "Fix error in previous step",
+      "description": "Address error: LLM completion failed: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"}}",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "planContext": "Create a simple React counter component with increment and decrement buttons. The component will be a functional component using hooks, styled with CSS modules. It will include a reset button and conditionally style the counter display based on its value (red when negative, green when positive). Basic documentation will also be added.",
+    "projectStructure": {},
+    "existingCode": [],
+    "dependencies": []
+  },
+  "id": "action-1740530060971-vwjdh3ioy",
+  "timestamp": "2025-02-26T00:34:20.971Z"
+}

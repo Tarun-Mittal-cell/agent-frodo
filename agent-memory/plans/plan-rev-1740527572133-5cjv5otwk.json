@@ -1,0 +1,120 @@
+{
+  "id": "plan-rev-1740527572133-5cjv5otwk",
+  "taskId": "task-1740527360360-vuwcujlkd",
+  "previousPlanId": "plan-rev-1740527477193-cpkofe3d3",
+  "title": "React Counter Component",
+  "description": "Create a simple React functional component that implements a counter with increment, decrement, and reset buttons. The counter value should be styled red when negative and green when positive using CSS modules.",
+  "steps": [
+    {
+      "id": "step-8",
+      "title": "Investigate and fix React code generation failure",
+      "description": "Look into the error message 'Failed to parse React code generation response: Unexpected token 'H', \"Here is th\"... is not valid JSON'. Debug and resolve the issue to enable successful code generation.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "high",
+      "status": "blocked",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-1",
+      "title": "Set up project",
+      "description": "Create a new React project using create-react-app. Remove unused boilerplate files.",
+      "type": "implementation",
+      "dependencies": [
+        "step-8"
+      ],
+      "estimatedComplexity": "low",
+      "status": "blocked",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-2",
+      "title": "Create Counter component",
+      "description": "Create a new Counter functional component that uses the useState hook to manage the counter value state.",
+      "type": "implementation",
+      "dependencies": [
+        "step-1"
+      ],
+      "estimatedComplexity": "low",
+      "status": "blocked",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-3",
+      "title": "Add increment and decrement buttons",
+      "description": "Add increment and decrement buttons to the Counter component that update the counter value state when clicked.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-4",
+      "title": "Style Counter with CSS modules",
+      "description": "Create a CSS module for the Counter component. Style the counter value to be red when negative and green when positive.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-5",
+      "title": "Add reset button",
+      "description": "Add a reset button to the Counter component that sets the counter value back to 0 when clicked.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-6",
+      "title": "Test Counter component",
+      "description": "Write unit tests for the Counter component to verify the increment, decrement, and reset functionality works properly.",
+      "type": "testing",
+      "dependencies": [
+        "step-3",
+        "step-5"
+      ],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-7",
+      "title": "Add documentation",
+      "description": "Write basic documentation explaining how to use the Counter component and add code comments.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2",
+        "step-3",
+        "step-4",
+        "step-5"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    }
+  ],
+  "createdAt": "2025-02-25T23:52:52.133Z",
+  "updatedAt": "2025-02-26T00:05:13.334Z",
+  "status": "active",
+  "progress": 0,
+  "revisionReason": "Added a new high-priority step to investigate and fix the React code generation failure before proceeding with the other implementation tasks. Updated the dependencies to reflect the new step order, with 'Set up project' now blocked until the code generation issue is resolved."
+}

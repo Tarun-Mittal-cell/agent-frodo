@@ -1,0 +1,115 @@
+{
+  "id": "plan-1740523345661-ah23rj2yx",
+  "taskId": "task-1740523317234-8jsoghypn",
+  "previousPlanId": null,
+  "title": "Create React Counter Component",
+  "description": "Build a simple React functional component that implements a counter with increment, decrement, and reset buttons. The counter should be styled with CSS modules and change color based on its value.",
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "Set up project",
+      "description": "Create a new React project using create-react-app. Remove unused boilerplate files.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "low",
+      "status": "blocked",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-2",
+      "title": "Create Counter component",
+      "description": "Create a new Counter functional component that uses the useState hook to manage the count state.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "low",
+      "status": "blocked",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-3",
+      "title": "Add increment and decrement buttons",
+      "description": "Add increment and decrement buttons to the Counter component that update the count state when clicked.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-4",
+      "title": "Style Counter with CSS modules",
+      "description": "Create a CSS module for the Counter component. Style the count display and buttons.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-5",
+      "title": "Add reset button",
+      "description": "Add a reset button to the Counter component that sets the count state back to 0 when clicked.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-6",
+      "title": "Conditionally style count based on value",
+      "description": "Update the Counter CSS module to display the count in red when negative and green when positive.",
+      "type": "implementation",
+      "dependencies": [
+        "step-4"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-7",
+      "title": "Add documentation",
+      "description": "Write basic documentation explaining how to use the Counter component and describing the props it accepts, if any.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-8",
+      "title": "Test Counter component",
+      "description": "Write unit tests to verify the functionality of the Counter component, including the increment, decrement, and reset buttons.",
+      "type": "testing",
+      "dependencies": [
+        "step-3",
+        "step-5"
+      ],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    }
+  ],
+  "createdAt": "2025-02-25T22:42:25.661Z",
+  "updatedAt": "2025-02-25T22:44:34.302Z",
+  "status": "active",
+  "progress": 0,
+  "revisionReason": null
+}

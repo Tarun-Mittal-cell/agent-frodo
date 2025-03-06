@@ -1,0 +1,9 @@
+{
+  "id": "result-1740530048745-ehwth6d4t",
+  "actionId": "action-1740530048745-x0gg9th1s",
+  "result": {
+    "status": "failed",
+    "error": "React code generation failed: LLM completion failed: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"}}"
+  },
+  "timestamp": "2025-02-26T00:34:08.745Z"
+}

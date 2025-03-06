@@ -1,0 +1,10 @@
+{
+  "description": "Create a simple React counter component with increment and decrement buttons",
+  "requirements": "\n      - Use React functional component with hooks\n      - Include increment and decrement buttons\n      - Style with CSS modules\n      - Add a reset button\n      - Make the counter display red when negative, green when positive\n      - Add basic documentation\n    ",
+  "id": "task-1740523317234-8jsoghypn",
+  "status": "failed",
+  "createdAt": "2025-02-25T22:41:57.234Z",
+  "updatedAt": "2025-02-25T22:47:24.384Z",
+  "startedAt": "2025-02-25T22:41:57.240Z",
+  "error": "Failed to revise plan: Failed to parse extracted JSON substring: Expected ',' or ']' after array element in JSON at position 3470"
+}

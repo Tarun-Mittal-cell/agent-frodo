@@ -1,0 +1,25 @@
+{
+  "type": "generate_code",
+  "stepId": "step-1",
+  "planId": "plan-1740541272016-xnvityy7c",
+  "description": "Create a new React project using Create React App. Remove unnecessary boilerplate files and code.",
+  "codeRequirements": {
+    "step": {
+      "id": "step-1",
+      "title": "Set up project",
+      "description": "Create a new React project using Create React App. Remove unnecessary boilerplate files and code.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "planContext": "Create a simple React counter component with increment and decrement buttons. The component will be a functional component using hooks, styled with CSS modules. It will include a reset button and conditionally style the counter display based on its value (red when negative, green when positive). Basic documentation will also be added.",
+    "projectStructure": {},
+    "existingCode": [],
+    "dependencies": []
+  },
+  "id": "action-1740541327430-oafbqa5wx",
+  "timestamp": "2025-02-26T03:42:07.429Z"
+}

@@ -1,0 +1,128 @@
+{
+  "id": "plan-rev-1740523544616-61vz0lg4y",
+  "taskId": "task-1740523317234-8jsoghypn",
+  "previousPlanId": "plan-1740523345661-ah23rj2yx",
+  "title": "Create React Counter Component",
+  "description": "Build a simple React functional component that implements a counter with increment, decrement, and reset buttons. The counter should be styled with CSS modules and change color based on its value.",
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "Set up project",
+      "description": "Create a new React project using create-react-app. Remove unused boilerplate files.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-2",
+      "title": "Create Counter component",
+      "description": "Create a new Counter functional component that uses the useState hook to manage the count state.",
+      "type": "implementation",
+      "dependencies": [
+        "step-1"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-3",
+      "title": "Add increment and decrement buttons",
+      "description": "Add increment and decrement buttons to the Counter component that update the count state when clicked.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-4",
+      "title": "Style Counter with CSS modules",
+      "description": "Create a CSS module for the Counter component. Style the count display and buttons.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-5",
+      "title": "Add reset button",
+      "description": "Add a reset button to the Counter component that sets the count state back to 0 when clicked.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-6",
+      "title": "Conditionally style count based on value",
+      "description": "Update the Counter CSS module to display the count in red when negative and green when positive.",
+      "type": "implementation",
+      "dependencies": [
+        "step-4"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-7",
+      "title": "Add documentation",
+      "description": "Write basic documentation explaining how to use the Counter component and describing the props it accepts, if any.",
+      "type": "implementation",
+      "dependencies": [
+        "step-2"
+      ],
+      "estimatedComplexity": "low",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-8",
+      "title": "Test Counter component",
+      "description": "Write unit tests to verify the functionality of the Counter component, including the increment, decrement, and reset buttons.",
+      "type": "testing",
+      "dependencies": [
+        "step-3",
+        "step-5"
+      ],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "step-9",
+      "title": "Handle failed unblock plan action",
+      "description": "Investigate and resolve the issue causing the unblock plan action to fail due to an invalid JSON response. Update the plan execution logic to handle this error gracefully.",
+      "type": "implementation",
+      "dependencies": [],
+      "estimatedComplexity": "medium",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null
+    }
+  ],
+  "createdAt": "2025-02-25T22:45:44.616Z",
+  "updatedAt": "2025-02-25T22:45:44.623Z",
+  "status": "active",
+  "progress": 0,
+  "revisionReason": "Added a new step to handle the failed unblock plan action reported in the insights. This step should be completed before proceeding with the rest of the plan to ensure smooth execution."
+}

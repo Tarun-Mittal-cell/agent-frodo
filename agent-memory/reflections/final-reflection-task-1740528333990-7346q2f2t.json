@@ -1,0 +1,9 @@
+{
+  "taskId": "task-1740528333990-7346q2f2t",
+  "summary": "Task completed, but final report generation failed.",
+  "error": "LLM completion failed: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"}}",
+  "status": "completed",
+  "timestamp": "2025-02-26T00:34:22.675Z",
+  "id": "final-reflection-task-1740528333990-7346q2f2t",
+  "isFinal": true
+}

@@ -1,0 +1,65 @@
+{
+  "id": "result-1740541382731-dx7thwhf3",
+  "actionId": "action-1740541382732-lqi3anicm",
+  "result": {
+    "status": "success",
+    "result": {
+      "status": "success",
+      "generatedCode": {
+        "files": [
+          {
+            "path": "src/components/Counter.js",
+            "code": "import React, { useState } from 'react';\nimport styles from './Counter.module.css';\n\n/**\n * Counter component that allows incrementing, decrementing, \n * and resetting a counter value.\n */\nconst Counter = () => {\n  const [count, setCount] = useState(0);\n\n  /**\n   * Increment the counter by 1\n   */\n  const increment = () => {\n    setCount(prevCount => prevCount + 1);\n  };\n\n  /**\n   * Decrement the counter by 1\n   */\n  const decrement = () => {\n    setCount(prevCount => prevCount - 1);\n  };\n\n  /**\n   * Reset the counter to 0\n   */\n  const reset = () => {\n    setCount(0);\n  };\n\n  return (\n    <div className={styles.counter}>\n      <h2 className={count < 0 ? styles.negative : count > 0 ? styles.positive : ''}>\n        Count: {count}\n      </h2>\n      <button onClick={increment}>Increment</button>\n      <button onClick={decrement}>Decrement</button>\n      <button onClick={reset}>Reset</button>\n    </div>\n  );\n};\n\nexport default Counter;",
+            "description": "The main Counter component that manages the counter state and renders the increment, decrement, and reset buttons. It conditionally applies CSS classes based on the counter value."
+          },
+          {
+            "path": "src/components/Counter.module.css",
+            "code": ".counter {\n  text-align: center;\n  padding: 20px;\n}\n\n.counter h2 {\n  font-size: 24px;\n  margin-bottom: 10px;\n}\n\n.counter button {\n  margin: 5px;\n  padding: 8px 16px;\n  font-size: 16px;\n}\n\n.positive {\n  color: green;\n}\n\n.negative {\n  color: red;\n}",
+            "description": "The CSS module for styling the Counter component. It includes styles for the counter container, heading, buttons, and conditional styles for positive and negative counter values."
+          }
+        ],
+        "explanation": "The Counter component is a functional component that uses the useState hook to manage the counter state. It renders the current count value and provides buttons to increment, decrement, and reset the counter. The component is styled using a CSS module (Counter.module.css) which defines styles for the counter container, heading, buttons, and conditionally applies styles based on the counter value (red for negative, green for positive). The component can be imported and used in other parts of the application as needed."
+      }
+    },
+    "action": {
+      "type": "generate_code",
+      "stepId": "step-2",
+      "planId": "plan-1740541272016-xnvityy7c",
+      "description": "Create a new functional component called Counter. Use the useState hook to manage the counter state.",
+      "codeRequirements": {
+        "step": {
+          "id": "step-2",
+          "title": "Create Counter component",
+          "description": "Create a new functional component called Counter. Use the useState hook to manage the counter state.",
+          "type": "implementation",
+          "dependencies": [],
+          "estimatedComplexity": "low",
+          "status": "pending",
+          "startedAt": null,
+          "completedAt": null
+        },
+        "planContext": "Create a simple React counter component with increment and decrement buttons. The component will be a functional component using hooks, styled with CSS modules. It will include a reset button and conditionally style the counter display based on its value (red when negative, green when positive). Basic documentation will also be added.",
+        "projectStructure": {},
+        "existingCode": [],
+        "dependencies": []
+      }
+    },
+    "generatedCode": {
+      "files": [
+        {
+          "path": "src/components/Counter.jsx",
+          "code": "import React, { useState } from 'react';\nimport styles from './Counter.module.css';\n\nconst Counter = () => {\n  const [count, setCount] = useState(0);\n\n  const increment = () => {\n    setCount(prevCount => prevCount + 1);\n  };\n\n  const decrement = () => {\n    setCount(prevCount => prevCount - 1);\n  };\n\n  const getCounterClass = () => {\n    if (count > 0) {\n      return styles.positive;\n    } else if (count < 0) {\n      return styles.negative;\n    }\n    return '';\n  };\n\n  return (\n    <div className={styles.counter}>\n      <h2 className={`${styles.count} ${getCounterClass()}`}>{count}</h2>\n      <button onClick={increment}>Increment</button>\n      <button onClick={decrement}>Decrement</button>\n    </div>\n  );\n};\n\nexport default Counter;",
+          "description": "The Counter component is a functional component that manages the counter state using the useState hook. It renders the current count value and provides increment and decrement buttons to modify the count. The count value is conditionally styled based on whether it is positive or negative."
+        },
+        {
+          "path": "src/components/Counter.module.css",
+          "code": ".counter {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n}\n\n.count {\n  font-size: 24px;\n  margin-bottom: 16px;\n}\n\n.positive {\n  color: green;\n}\n\n.negative {\n  color: red;\n}\n\nbutton {\n  margin: 8px;\n  padding: 8px 16px;\n  font-size: 16px;\n}",
+          "description": "The CSS module file for styling the Counter component. It defines styles for the counter container, count value, and conditionally applies positive or negative styles based on the count value. It also styles the increment and decrement buttons."
+        }
+      ],
+      "framework": "react",
+      "explanation": "The Counter component is a self-contained functional component that manages its own state using the useState hook. It renders the current count value and provides increment and decrement buttons to modify the count.\n\nThe component imports the CSS module file (Counter.module.css) to apply styles to the elements. The styles are scoped to the component to avoid naming conflicts.\n\nThe getCounterClass function determines the appropriate CSS class to apply to the count value based on whether it is positive, negative, or zero. This allows for conditional styling of the count.\n\nThe increment and decrement functions update the count state by using the setCount function provided by the useState hook. They use the functional form of setState to ensure the state is updated correctly based on the previous state.\n\nOverall, this Counter component demonstrates the usage of functional components, hooks (useState), and CSS modules in React to create a reusable and self-contained component with its own state and styling."
+    }
+  },
+  "timestamp": "2025-02-26T03:43:02.731Z"
+}
