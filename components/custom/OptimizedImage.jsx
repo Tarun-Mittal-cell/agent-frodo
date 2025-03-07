@@ -2,169 +2,177 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Loader2 } from "lucide-react";
-import ImageUtils from "@/lib/ImageUtils";
 
 /**
- * OptimizedImage - A professional Next.js Image wrapper with bullet-proof reliability
- * - Enhanced error handling with multiple fallbacks
- * - Loading states and smooth transitions
- * - Support for multiple image sources
- * - Built-in avatar support
+ * OptimizedImage component
+ * A robust image component that handles different image formats including
+ * base64 encoded images from Stability AI, regular URLs, and fallback scenarios
  */
 const OptimizedImage = ({
   src,
-  alt = "Image",
-  width,
-  height,
+  alt,
+  width = 400,
+  height = 300,
   className = "",
   priority = false,
-  sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
-  objectFit = "cover",
-  objectPosition = "center",
-  style = {},
-  isAvatar = false,
-  avatarName = "",
-  category = "",
-  fallbackSrc,
-  showLoadingIndicator = true,
-  quality = 80,
-  ...rest
+  onLoad,
+  onError,
+  ...props
 }) => {
-  const [imgSrc, setImgSrc] = useState(src);
-  const [fallbacks, setFallbacks] = useState([]);
-  const [currentFallbackIndex, setCurrentFallbackIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [dimensions, setDimensions] = useState({ width, height });
-  const shouldFill = !width || !height;
+  const [hasError, setHasError] = useState(false);
+  const [imageSrc, setImageSrc] = useState("");
+  const [fallbackAttempts, setFallbackAttempts] = useState(0);
+  const maxFallbackAttempts = 3;
 
-  // Initialize image source and fallbacks
+  const fallbackImages = [
+    "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg",
+    "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg",
+    "https://images.pexels.com/photos/1209843/pexels-photo-1209843.jpeg",
+  ];
+
   useEffect(() => {
-    // For avatars, use the avatar generator utility
-    if (isAvatar) {
-      const name = avatarName || alt || "User";
-      const avatarData = ImageUtils.getAvatar(name, { size: width || 200 });
-      setImgSrc(avatarData.url);
-      setFallbacks(avatarData.fallbacks || []);
-      setDimensions({
-        width: avatarData.width || 200,
-        height: avatarData.height || 200,
-      });
-      return;
-    }
+    // Reset state when src changes
+    setIsLoading(true);
+    setHasError(false);
+    setFallbackAttempts(0);
+    setImageSrc(src);
+  }, [src]);
 
-    // Regular images
-    if (src) {
-      setImgSrc(src);
+  // Handle successful image load
+  const handleImageLoad = (e) => {
+    setIsLoading(false);
+    if (onLoad) onLoad(e);
+  };
 
-      // Set up fallbacks
-      const newFallbacks = [];
+  // Handle image loading error
+  const handleImageError = (e) => {
+    console.warn("Image loading error:", src);
 
-      // Custom fallback is top priority
-      if (fallbackSrc) {
-        newFallbacks.push(fallbackSrc);
-      }
-
-      // If we have a category, add fallbacks from our library
-      if (category) {
-        const fallbackImage = ImageUtils.getFallbackImage(category);
-        newFallbacks.push(fallbackImage.url);
-      }
-
-      // Add generic reliable fallbacks
-      newFallbacks.push(
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(alt)}&size=256&background=random`,
-        `https://picsum.photos/${width || 800}/${height || 600}?random=${Math.random()}`,
-        `https://via.placeholder.com/${width || 800}x${height || 600}?text=${encodeURIComponent(alt)}`
+    if (fallbackAttempts < maxFallbackAttempts) {
+      // Try a fallback image
+      const nextFallbackImage =
+        fallbackImages[fallbackAttempts % fallbackImages.length];
+      console.log(
+        `Trying fallback image #${fallbackAttempts + 1}:`,
+        nextFallbackImage
       );
 
-      setFallbacks(newFallbacks);
-    }
-  }, [src, isAvatar, avatarName, alt, category, fallbackSrc, width, height]);
-
-  // Handle loading complete
-  const handleLoadingComplete = () => {
-    setIsLoading(false);
-  };
-
-  // Handle image loading error with cascading fallbacks
-  const handleError = () => {
-    // Mark current source as errored
-    setIsError(true);
-    setIsLoading(false);
-
-    // Try the next fallback if available
-    if (currentFallbackIndex < fallbacks.length) {
-      setImgSrc(fallbacks[currentFallbackIndex]);
-      setCurrentFallbackIndex(currentFallbackIndex + 1);
+      setFallbackAttempts((prev) => prev + 1);
+      setImageSrc(nextFallbackImage);
+    } else {
+      setIsLoading(false);
+      setHasError(true);
+      if (onError) onError(e);
     }
   };
 
-  // Calculate aspect ratio for the container if both dimensions provided
-  const aspectRatio =
-    dimensions.width && dimensions.height
-      ? dimensions.width / dimensions.height
-      : undefined;
+  // Determine if we should use Next.js Image component or regular img tag
+  const useNextImage = !(
+    src &&
+    (src.startsWith("data:") || // For base64 images
+      (typeof src === "string" && src.length > 5000)) // Large strings are likely inline base64
+  );
 
-  // Build image classes intelligently
-  const imageClasses = [
-    isError ? "opacity-80" : "",
-    objectFit === "cover"
-      ? "object-cover"
-      : objectFit === "contain"
-        ? "object-contain"
-        : objectFit === "fill"
-          ? "object-fill"
-          : objectFit === "none"
-            ? "object-none"
-            : objectFit === "scale-down"
-              ? "object-scale-down"
-              : "",
-    isLoading ? "opacity-0" : "opacity-100 transition-opacity duration-300",
-    isAvatar ? "rounded-full" : "",
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  // For base64 or very long URLs, Image component may not be optimal
+  if (!useNextImage) {
+    return (
+      <div
+        className={`relative overflow-hidden ${className}`}
+        style={{ width, height }}
+      >
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 z-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500" />
+          </div>
+        )}
 
+        {hasError ? (
+          <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">
+            <div className="text-center">
+              <svg
+                className="w-10 h-10 mx-auto text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <p className="mt-2 text-sm">
+                {alt || "Image could not be loaded"}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <img
+            src={imageSrc}
+            alt={alt || "Image"}
+            className={`w-full h-full object-cover ${className}`}
+            width={width}
+            height={height}
+            loading={priority ? "eager" : "lazy"}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+            {...props}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // For regular images, use Next.js Image component
   return (
     <div
-      className={`relative overflow-hidden ${shouldFill ? "w-full h-full" : ""}`}
-      style={{
-        aspectRatio: aspectRatio,
-        ...style,
-      }}
+      className={`relative overflow-hidden ${className}`}
+      style={{ width, height }}
     >
-      {/* Loading indicator */}
-      {isLoading && showLoadingIndicator && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 bg-opacity-50 dark:bg-opacity-50">
-          <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 z-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500" />
         </div>
       )}
 
-      {/* NextJS Image with proper props */}
-      <Image
-        src={imgSrc}
-        alt={alt}
-        fill={shouldFill}
-        width={shouldFill ? undefined : dimensions.width}
-        height={shouldFill ? undefined : dimensions.height}
-        priority={priority}
-        sizes={sizes}
-        onLoadingComplete={handleLoadingComplete}
-        onError={handleError}
-        className={imageClasses}
-        style={{
-          objectPosition,
-          ...(isError && currentFallbackIndex >= fallbacks.length
-            ? { filter: "grayscale(0.5)" }
-            : {}),
-        }}
-        quality={quality}
-        loading={priority ? "eager" : "lazy"}
-        {...rest}
-      />
+      {hasError ? (
+        <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">
+          <div className="text-center">
+            <svg
+              className="w-10 h-10 mx-auto text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <p className="mt-2 text-sm">{alt || "Image could not be loaded"}</p>
+          </div>
+        </div>
+      ) : (
+        <Image
+          src={imageSrc}
+          alt={alt || "Image"}
+          width={width}
+          height={height}
+          className={`object-cover ${className}`}
+          priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          unoptimized={
+            imageSrc.startsWith("data:") || imageSrc.includes("randomuser.me")
+          }
+          {...props}
+        />
+      )}
     </div>
   );
 };
