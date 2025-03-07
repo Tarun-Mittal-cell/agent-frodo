@@ -8,9 +8,9 @@ import ImageUtils from "@/lib/ImageUtils";
 /**
  * OptimizedImage - A professional Next.js Image wrapper with bullet-proof reliability
  * - Enhanced error handling with multiple fallbacks
- * - Loading states and smooth transitions
- * - Support for multiple image sources
- * - Built-in avatar support
+ * - Loading states with smooth transitions
+ * - Support for regular images, avatars, and category-based images
+ * - Built-in accessibility and performance optimizations
  */
 const OptimizedImage = ({
   src,
@@ -31,97 +31,127 @@ const OptimizedImage = ({
   quality = 80,
   ...rest
 }) => {
-  const [imgSrc, setImgSrc] = useState(src);
-  const [fallbacks, setFallbacks] = useState([]);
-  const [currentFallbackIndex, setCurrentFallbackIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [dimensions, setDimensions] = useState({ width, height });
+  // Consolidated state for image data
+  const [imageData, setImageData] = useState({
+    src: src || "",
+    fallbacks: [],
+    currentFallbackIndex: 0,
+    isLoading: true,
+    isError: false,
+    dimensions: { width, height },
+  });
+
   const shouldFill = !width || !height;
 
   // Initialize image source and fallbacks
   useEffect(() => {
-    // For avatars, use the avatar generator utility
-    if (isAvatar) {
-      const name = avatarName || alt || "User";
-      const avatarData = ImageUtils.getAvatar(name, { size: width || 200 });
-      setImgSrc(avatarData.url);
-      setFallbacks(avatarData.fallbacks || []);
-      setDimensions({
-        width: avatarData.width || 200,
-        height: avatarData.height || 200,
-      });
-      return;
-    }
+    let isMounted = true;
 
-    // Regular images
-    if (src) {
-      setImgSrc(src);
+    const initializeImage = async () => {
+      let initialSrc = src;
+      let initialFallbacks = [];
+      let updatedDimensions = { width, height };
 
-      // Set up fallbacks
-      const newFallbacks = [];
+      try {
+        if (isAvatar) {
+          const name = avatarName || alt || "User";
+          const avatarData = ImageUtils.getAvatar(name, { size: width || 200 });
+          initialSrc = avatarData.url;
+          initialFallbacks = avatarData.fallbacks || [];
+          updatedDimensions = {
+            width: avatarData.width || 200,
+            height: avatarData.height || 200,
+          };
+        } else if (category) {
+          const imageData = await ImageUtils.getOptimizedImage(category, {
+            width,
+            height,
+          });
+          initialSrc = imageData.url;
+          initialFallbacks = imageData.fallbacks || [
+            ImageUtils.getFallbackImage(category).url,
+          ];
+        } else if (src) {
+          initialSrc = src;
+          initialFallbacks = fallbackSrc ? [fallbackSrc] : [];
+        } else {
+          const defaultImage = ImageUtils.getFallbackImage("default");
+          initialSrc = defaultImage.url;
+          initialFallbacks = [defaultImage.url];
+        }
 
-      // Custom fallback is top priority
-      if (fallbackSrc) {
-        newFallbacks.push(fallbackSrc);
+        // Add robust generic fallbacks
+        initialFallbacks.push(
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(alt)}&size=256&background=random`,
+          `https://picsum.photos/${width || 800}/${height || 600}?random=${Math.random()}`,
+          `https://via.placeholder.com/${width || 800}x${height || 600}?text=${encodeURIComponent(alt)}`,
+          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" // Transparent pixel
+        );
+      } catch (error) {
+        console.error("Error initializing image:", error);
+        initialSrc =
+          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+        initialFallbacks = [];
       }
 
-      // If we have a category, add fallbacks from our library
-      if (category) {
-        const fallbackImage = ImageUtils.getFallbackImage(category);
-        newFallbacks.push(fallbackImage.url);
+      if (isMounted) {
+        setImageData({
+          src: initialSrc,
+          fallbacks: initialFallbacks,
+          currentFallbackIndex: 0,
+          isLoading: true,
+          isError: false,
+          dimensions: updatedDimensions,
+        });
       }
+    };
 
-      // Add generic reliable fallbacks
-      newFallbacks.push(
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(alt)}&size=256&background=random`,
-        `https://picsum.photos/${width || 800}/${height || 600}?random=${Math.random()}`,
-        `https://via.placeholder.com/${width || 800}x${height || 600}?text=${encodeURIComponent(alt)}`
-      );
+    initializeImage();
 
-      setFallbacks(newFallbacks);
-    }
+    return () => {
+      isMounted = false;
+    };
   }, [src, isAvatar, avatarName, alt, category, fallbackSrc, width, height]);
 
-  // Handle loading complete
+  // Handle successful image load
   const handleLoadingComplete = () => {
-    setIsLoading(false);
+    setImageData((prev) => ({ ...prev, isLoading: false }));
   };
 
   // Handle image loading error with cascading fallbacks
   const handleError = () => {
-    // Mark current source as errored
-    setIsError(true);
-    setIsLoading(false);
-
-    // Try the next fallback if available
-    if (currentFallbackIndex < fallbacks.length) {
-      setImgSrc(fallbacks[currentFallbackIndex]);
-      setCurrentFallbackIndex(currentFallbackIndex + 1);
-    }
+    setImageData((prev) => {
+      const nextIndex = prev.currentFallbackIndex + 1;
+      if (nextIndex < prev.fallbacks.length) {
+        return {
+          ...prev,
+          src: prev.fallbacks[nextIndex],
+          currentFallbackIndex: nextIndex,
+          isError: true,
+        };
+      }
+      return {
+        ...prev,
+        src: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+        isError: true,
+        isLoading: false,
+      };
+    });
   };
 
-  // Calculate aspect ratio for the container if both dimensions provided
+  // Calculate aspect ratio for responsive layout
   const aspectRatio =
-    dimensions.width && dimensions.height
-      ? dimensions.width / dimensions.height
+    imageData.dimensions.width && imageData.dimensions.height
+      ? imageData.dimensions.width / imageData.dimensions.height
       : undefined;
 
-  // Build image classes intelligently
+  // Build image classes dynamically
   const imageClasses = [
-    isError ? "opacity-80" : "",
-    objectFit === "cover"
-      ? "object-cover"
-      : objectFit === "contain"
-        ? "object-contain"
-        : objectFit === "fill"
-          ? "object-fill"
-          : objectFit === "none"
-            ? "object-none"
-            : objectFit === "scale-down"
-              ? "object-scale-down"
-              : "",
-    isLoading ? "opacity-0" : "opacity-100 transition-opacity duration-300",
+    imageData.isError ? "opacity-80" : "",
+    `object-${objectFit}`,
+    imageData.isLoading
+      ? "opacity-0"
+      : "opacity-100 transition-opacity duration-300",
     isAvatar ? "rounded-full" : "",
     className,
   ]
@@ -132,24 +162,24 @@ const OptimizedImage = ({
     <div
       className={`relative overflow-hidden ${shouldFill ? "w-full h-full" : ""}`}
       style={{
-        aspectRatio: aspectRatio,
+        aspectRatio,
         ...style,
       }}
     >
       {/* Loading indicator */}
-      {isLoading && showLoadingIndicator && (
+      {imageData.isLoading && showLoadingIndicator && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 bg-opacity-50 dark:bg-opacity-50">
           <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
         </div>
       )}
 
-      {/* NextJS Image with proper props */}
+      {/* Next.js Image component */}
       <Image
-        src={imgSrc}
+        src={imageData.src}
         alt={alt}
         fill={shouldFill}
-        width={shouldFill ? undefined : dimensions.width}
-        height={shouldFill ? undefined : dimensions.height}
+        width={shouldFill ? undefined : imageData.dimensions.width}
+        height={shouldFill ? undefined : imageData.dimensions.height}
         priority={priority}
         sizes={sizes}
         onLoadingComplete={handleLoadingComplete}
@@ -157,7 +187,8 @@ const OptimizedImage = ({
         className={imageClasses}
         style={{
           objectPosition,
-          ...(isError && currentFallbackIndex >= fallbacks.length
+          ...(imageData.isError &&
+          imageData.currentFallbackIndex >= imageData.fallbacks.length
             ? { filter: "grayscale(0.5)" }
             : {}),
         }}

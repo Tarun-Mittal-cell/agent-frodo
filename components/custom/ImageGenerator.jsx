@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import ImageUtils from "../../lib/ImageUtils";
 import OptimizedImage from "./OptimizedImage";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
+import { toast } from "sonner";
+
+// Cache to store images by category, reducing redundant API calls
+const imageCache = {};
 
 const ImageGenerator = ({ initialCategory = "abstract" }) => {
   const [category, setCategory] = useState(initialCategory);
@@ -28,55 +32,78 @@ const ImageGenerator = ({ initialCategory = "abstract" }) => {
     { id: "travel", label: "Travel" },
   ];
 
-  // Load initial images based on selected category
-  useEffect(() => {
-    loadCategoryImages(category);
-  }, [category]);
-
-  // Function to load images for a specific category
-  const loadCategoryImages = (category) => {
-    setIsLoading(true);
-    try {
-      // Get 8 images for the gallery
-      const images = ImageUtils.getImageSet(category, 8);
-      setGalleryImages(images);
-
-      // Select the first image as default
-      if (images.length > 0 && !selectedImage) {
-        setSelectedImage(images[0]);
+  // Load images for a category with caching
+  const loadCategoryImages = useCallback(
+    async (cat) => {
+      setIsLoading(true);
+      try {
+        if (imageCache[cat]) {
+          // Use cached images if available
+          setGalleryImages(imageCache[cat]);
+          if (imageCache[cat].length > 0 && !selectedImage) {
+            setSelectedImage(imageCache[cat][0]);
+          }
+        } else {
+          // Fetch 8 images from the API
+          const images = await Promise.all(
+            Array.from({ length: 8 }, () => ImageUtils.getOptimizedImage(cat))
+          );
+          imageCache[cat] = images; // Cache the results
+          setGalleryImages(images);
+          if (images.length > 0 && !selectedImage) {
+            setSelectedImage(images[0]);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading images from API:", error);
+        toast.error("Failed to load images from API. Using fallback images.");
+        // Fallback to local library
+        const fallbackImages = ImageUtils.getImageSet(cat, 8);
+        setGalleryImages(fallbackImages);
+        if (fallbackImages.length > 0 && !selectedImage) {
+          setSelectedImage(fallbackImages[0]);
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error loading images:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [selectedImage]
+  );
 
-  // Function to select a random image from the current category
-  const selectRandomImage = () => {
+  // Select a random image from the current category
+  const selectRandomImage = async () => {
     setIsLoading(true);
     try {
-      const randomImage = ImageUtils.getRandomImage(category);
+      const randomImage = await ImageUtils.getOptimizedImage(category);
       setSelectedImage(randomImage);
     } catch (error) {
-      console.error("Error selecting random image:", error);
+      console.error("Error selecting random image from API:", error);
+      toast.error("Failed to load random image. Using fallback.");
+      const fallbackImage = ImageUtils.getRandomImage(category);
+      setSelectedImage(fallbackImage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Function to handle category change
+  // Handle category change
   const handleCategoryChange = (newCategory) => {
     setCategory(newCategory);
-    setSelectedImage(null); // Reset selected image when changing categories
+    setSelectedImage(null); // Reset selected image on category change
   };
+
+  // Load images when category changes
+  useEffect(() => {
+    loadCategoryImages(category);
+  }, [category, loadCategoryImages]);
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4 space-y-6">
+      {/* Header and Controls */}
       <div className="flex flex-col space-y-4">
         <h2 className="text-2xl font-bold">Image Generator</h2>
 
-        {/* Category selection */}
+        {/* Category Buttons */}
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <Button
@@ -84,6 +111,7 @@ const ImageGenerator = ({ initialCategory = "abstract" }) => {
               variant={category === cat.id ? "default" : "outline"}
               onClick={() => handleCategoryChange(cat.id)}
               className="text-sm"
+              aria-label={`Select ${cat.label} category`}
             >
               {cat.label}
             </Button>
@@ -97,7 +125,7 @@ const ImageGenerator = ({ initialCategory = "abstract" }) => {
 
       <Separator />
 
-      {/* Selected image display */}
+      {/* Selected Image Display */}
       {selectedImage && (
         <div className="space-y-4">
           <h3 className="text-xl font-medium">Selected Image</h3>
@@ -129,7 +157,7 @@ const ImageGenerator = ({ initialCategory = "abstract" }) => {
 
       <Separator />
 
-      {/* Image gallery */}
+      {/* Image Gallery */}
       <div className="space-y-4">
         <h3 className="text-xl font-medium">Gallery</h3>
         {isLoading ? (
@@ -138,6 +166,7 @@ const ImageGenerator = ({ initialCategory = "abstract" }) => {
               <div
                 key={index}
                 className="aspect-w-4 aspect-h-3 bg-gray-200 animate-pulse rounded-lg"
+                aria-label="Loading image placeholder"
               />
             ))}
           </div>
@@ -152,6 +181,10 @@ const ImageGenerator = ({ initialCategory = "abstract" }) => {
                     : "border-transparent hover:border-gray-300"
                 }`}
                 onClick={() => setSelectedImage(image)}
+                onKeyPress={(e) => e.key === "Enter" && setSelectedImage(image)}
+                role="button"
+                tabIndex={0}
+                aria-label={`Select image: ${image.alt}`}
               >
                 <OptimizedImage
                   src={image.url}

@@ -20,26 +20,70 @@ import SandpackPreviewClient from "./SandpackPreviewClient";
 import { ActionContext } from "@/context/ActionContext";
 import { toast } from "sonner";
 
+// ErrorBoundary class component
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error in CodeView:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-4 text-red-500 bg-red-100 rounded-lg">
+          Something went wrong in the code editor. Please refresh the page.
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function CodeView() {
   const { id } = useParams();
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
   const [activeTab, setActiveTab] = useState("code");
-  const [files, setFiles] = useState(Lookup?.DEFAULT_FILE);
+  const [files, setFiles] = useState(Lookup?.DEFAULT_FILE || {});
   const { messages, setMessages } = useContext(MessagesContext);
-  const UpdateFiles = useMutation(api.workspace.UpdateFiles);
+  const updateFiles = useMutation(api.workspace.UpdateFiles);
   const convex = useConvex();
   const [loading, setLoading] = useState(false);
-  const UpdateTokens = useMutation(api.users.UpdateToken);
+  const updateTokens = useMutation(api.users.UpdateToken);
   const { action, setAction } = useContext(ActionContext);
 
-  // Fetch files when the workspace ID changes
+  // Fetch files when workspace ID changes
   useEffect(() => {
-    if (id) {
-      GetFiles();
-    }
-  }, [id]);
+    if (!id) return;
 
-  // Switch to preview tab when an action is triggered
+    const fetchFiles = async () => {
+      setLoading(true);
+      try {
+        const result = await convex.query(api.workspace.GetWorkspace, {
+          workspaceId: id,
+        });
+        if (result?.fileData) {
+          setFiles((prev) => ({
+            ...Lookup.DEFAULT_FILE,
+            ...result.fileData,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching workspace files:", error);
+        toast.error("Failed to load workspace files.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFiles();
+  }, [id, convex]);
+
+  // Switch to preview tab when action is triggered
   useEffect(() => {
     if (action) {
       setActiveTab("preview");
@@ -48,71 +92,45 @@ function CodeView() {
 
   // Generate AI code when a new user message is added
   useEffect(() => {
-    if (messages?.length > 0) {
-      const role = messages[messages.length - 1].role;
-      if (role === "user") {
-        GenerateAiCode();
-      }
+    if (!messages?.length) return;
+
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.role === "user") {
+      generateAiCode();
     }
   }, [messages]);
 
-  const GetFiles = async () => {
+  const generateAiCode = async () => {
     setLoading(true);
     try {
-      const result = await convex.query(api.workspace.GetWorkspace, {
-        workspaceId: id,
-      });
-      if (result?.fileData) {
-        const mergedFiles = { ...Lookup.DEFAULT_FILE, ...result.fileData };
-        setFiles(mergedFiles);
-      }
-    } catch (error) {
-      console.error("Error fetching workspace files:", error);
-      toast.error("Failed to fetch workspace files. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const GenerateAiCode = async () => {
-    setLoading(true);
-    try {
-      const PROMPT = JSON.stringify(messages) + " " + Prompt.CODE_GEN_PROMPT;
-      const response = await axios.post("/api/gen-ai-code", {
-        prompt: PROMPT,
-      });
+      const prompt = `${JSON.stringify(messages)} ${Prompt.CODE_GEN_PROMPT}`;
+      const response = await axios.post("/api/gen-ai-code", { prompt });
       const aiResp = response.data;
 
       if (aiResp?.files) {
         const mergedFiles = { ...Lookup.DEFAULT_FILE, ...aiResp.files };
         setFiles(mergedFiles);
 
-        // Update files in the database
-        await UpdateFiles({
+        await updateFiles({
           workspaceId: id,
           files: aiResp.files,
         });
 
-        // Update user tokens
         if (userDetail?._id) {
-          const token =
-            Number(userDetail?.token) -
-            Number(countToken(JSON.stringify(aiResp)));
+          const tokenCount = countToken(JSON.stringify(aiResp));
+          const newToken = Number(userDetail.token) - tokenCount;
 
-          await UpdateTokens({
+          await updateTokens({
             userId: userDetail._id,
-            token: token,
+            token: newToken,
           });
 
-          setUserDetail((prev) => ({
-            ...prev,
-            token: token,
-          }));
+          setUserDetail((prev) => ({ ...prev, token: newToken }));
         }
       }
     } catch (error) {
       console.error("Error generating AI code:", error);
-      toast.error("Server-side error! Please try again.");
+      toast.error("Failed to generate code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -125,24 +143,26 @@ function CodeView() {
     >
       {/* Tabs Section */}
       <div className="bg-[#181818] w-full p-2 border-b border-[#333]">
-        <div className="flex items-center flex-wrap bg-black p-1 justify-center rounded-full w-full max-w-[200px] mx-auto gap-3">
+        <div className="flex items-center justify-center gap-3 bg-black p-1 rounded-full w-full max-w-[200px] mx-auto">
           <button
             onClick={() => setActiveTab("code")}
-            className={`text-sm cursor-pointer transition-all duration-200 ${
+            className={`text-sm transition-all duration-200 ${
               activeTab === "code"
                 ? "text-blue-500 bg-blue-500 bg-opacity-25 p-1 px-2 rounded-full"
                 : "text-gray-300 hover:text-blue-400"
             }`}
+            aria-label="View Code"
           >
             Code
           </button>
           <button
             onClick={() => setActiveTab("preview")}
-            className={`text-sm cursor-pointer transition-all duration-200 ${
+            className={`text-sm transition-all duration-200 ${
               activeTab === "preview"
                 ? "text-blue-500 bg-blue-500 bg-opacity-25 p-1 px-2 rounded-full"
                 : "text-gray-300 hover:text-blue-400"
             }`}
+            aria-label="View Preview"
           >
             Preview
           </button>
@@ -151,42 +171,44 @@ function CodeView() {
 
       {/* Main Content Area */}
       <div className="flex-1 w-full" style={{ height: "calc(100% - 52px)" }}>
-        <SandpackProvider
-          files={files}
-          template="react"
-          theme="dark"
-          customSetup={{
-            dependencies: Lookup.DEPENDANCY || {},
-          }}
-          options={{
-            externalResources: ["https://cdn.tailwindcss.com"],
-            visibleFiles: Object.keys(files),
-            recompileMode: "immediate",
-            recompileDelay: 300,
-          }}
-        >
-          {activeTab === "code" ? (
-            <div className="h-full flex" style={{ minHeight: "600px" }}>
-              <div className="w-52 h-full border-r border-[#333] overflow-y-auto">
-                <SandpackFileExplorer />
+        <ErrorBoundary>
+          <SandpackProvider
+            files={files}
+            template="react"
+            theme="dark"
+            customSetup={{
+              dependencies: Lookup.DEPENDANCY || {},
+            }}
+            options={{
+              externalResources: ["https://cdn.tailwindcss.com"],
+              visibleFiles: Object.keys(files),
+              recompileMode: "immediate",
+              recompileDelay: 300,
+            }}
+          >
+            {activeTab === "code" ? (
+              <div className="h-full flex" style={{ minHeight: "600px" }}>
+                <div className="w-52 h-full border-r border-[#333] overflow-y-auto">
+                  <SandpackFileExplorer />
+                </div>
+                <div className="flex-1 h-full">
+                  <SandpackCodeEditor
+                    showTabs
+                    showLineNumbers
+                    showInlineErrors
+                    wrapContent
+                    closableTabs
+                    style={{ height: "100%" }}
+                  />
+                </div>
               </div>
-              <div className="flex-1 h-full">
-                <SandpackCodeEditor
-                  showTabs
-                  showLineNumbers
-                  showInlineErrors
-                  wrapContent
-                  closableTabs
-                  style={{ height: "100%" }}
-                />
-              </div>
-            </div>
-          ) : (
-            <SandpackLayout>
-              <SandpackPreviewClient />
-            </SandpackLayout>
-          )}
-        </SandpackProvider>
+            ) : (
+              <SandpackLayout>
+                <SandpackPreviewClient />
+              </SandpackLayout>
+            )}
+          </SandpackProvider>
+        </ErrorBoundary>
       </div>
 
       {/* Loading Overlay */}

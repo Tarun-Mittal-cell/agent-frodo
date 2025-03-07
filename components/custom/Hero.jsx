@@ -16,22 +16,20 @@ import {
   ChevronDown,
   UploadCloud,
   Search,
-  Rocket,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import SignInDialog from "./SignInDialog";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import ImageUtils from "@/lib/ImageUtils";
-import axios from "axios";
+import OptimizedImage from "./OptimizedImage"; // Custom component for optimized image loading
 
 function Hero() {
-  // Context and state
+  // Contexts and State Management
   const { messages, setMessages } = useContext(MessagesContext);
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
-  // Safely access ActionContext (it might not be available)
   const actionContext = useContext(ActionContext);
   const setIsGenerating = actionContext?.setIsGenerating;
   const [userInput, setUserInput] = useState("");
@@ -67,180 +65,94 @@ function Hero() {
   const textareaRef = useRef(null);
   const animationFrameRef = useRef(null);
 
-  // Mutations
-  const CreateWorkspace = useMutation(api.workspace.CreateWorkspace);
   const router = useRouter();
+  const CreateWorkspace = useMutation(api.workspace.CreateWorkspace);
 
-  // Load background image on mount
+  // Initialize Background and Particles
   useEffect(() => {
-    // Get a high-quality background image from our reliable sources
     const image = ImageUtils.getRandomImage("abstract");
     setBackgroundImage(image.url);
-
-    // Create interactive particles
     initParticles();
 
-    // Automatically focus the textarea
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
+    if (textareaRef.current) textareaRef.current.focus();
 
-    // Cleanup animation frame on unmount
     return () => {
-      if (animationFrameRef.current) {
+      if (animationFrameRef.current)
         cancelAnimationFrame(animationFrameRef.current);
-      }
     };
   }, []);
 
-  // Initialize the interactive particle effect
+  // Particle Animation Logic
   const initParticles = () => {
     if (!containerRef.current) return;
-
     const containerRect = containerRef.current.getBoundingClientRect();
-    const newParticles = [];
-
-    for (let i = 0; i < 50; i++) {
-      newParticles.push({
-        id: i,
-        x: Math.random() * containerRect.width,
-        y: Math.random() * containerRect.height,
-        size: Math.random() * 4 + 1,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        color: `rgba(${Math.floor(Math.random() * 100 + 155)}, ${Math.floor(
-          Math.random() * 100 + 155
-        )}, ${Math.floor(Math.random() * 255)}, ${Math.random() * 0.5 + 0.1})`,
-      });
-    }
-
+    const newParticles = Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      x: Math.random() * containerRect.width,
+      y: Math.random() * containerRect.height,
+      size: Math.random() * 4 + 1,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      color: `rgba(${Math.floor(Math.random() * 100 + 155)}, ${Math.floor(Math.random() * 100 + 155)}, ${Math.floor(Math.random() * 255)}, ${Math.random() * 0.5 + 0.1})`,
+    }));
     particlesRef.current = newParticles;
     setParticles(newParticles);
+    animateParticles();
+  };
 
-    // Animate particles
-    const animateParticles = () => {
-      if (!containerRef.current) return;
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-
-      particlesRef.current = particlesRef.current.map((particle) => {
-        // Update position
-        let newX = particle.x + particle.vx;
-        let newY = particle.y + particle.vy;
-
-        // Bounce off walls
-        if (newX <= 0 || newX >= containerRect.width) {
-          particle.vx *= -1;
-          newX = particle.x + particle.vx;
-        }
-
-        if (newY <= 0 || newY >= containerRect.height) {
-          particle.vy *= -1;
-          newY = particle.y + particle.vy;
-        }
-
-        return {
-          ...particle,
-          x: newX,
-          y: newY,
-        };
-      });
-
-      setParticles([...particlesRef.current]);
-      animationFrameRef.current = requestAnimationFrame(animateParticles);
-    };
-
+  const animateParticles = () => {
+    if (!containerRef.current) return;
+    const containerRect = containerRef.current.getBoundingClientRect();
+    particlesRef.current = particlesRef.current.map((particle) => {
+      let newX = particle.x + particle.vx;
+      let newY = particle.y + particle.vy;
+      if (newX <= 0 || newX >= containerRect.width) particle.vx *= -1;
+      if (newY <= 0 || newY >= containerRect.height) particle.vy *= -1;
+      return { ...particle, x: newX, y: newY };
+    });
+    setParticles([...particlesRef.current]);
     animationFrameRef.current = requestAnimationFrame(animateParticles);
   };
 
-  // Handle generation process with enhanced features
+  // Generate Content Handler
   const onGenerate = async (input) => {
     if (!userDetail?.name) {
       setOpenDialog(true);
       return;
     }
-
     if (userDetail?.token < 10) {
       toast.error("Insufficient tokens! Please upgrade your account.", {
         description: "You need at least 10 tokens to generate content",
-        action: {
-          label: "Upgrade",
-          onClick: () => router.push("/pricing"),
-        },
+        action: { label: "Upgrade", onClick: () => router.push("/pricing") },
       });
       return;
     }
-
     setIsLoading(true);
-
     try {
-      // Check if the input requires web browsing
-      const needsWebBrowsing =
-        input.toLowerCase().includes("browse") ||
-        input.toLowerCase().includes("search") ||
-        input.toLowerCase().includes("look up");
-
-      // Check if the input requires API integration
-      const needsAPI =
-        input.toLowerCase().includes("api") ||
-        input.toLowerCase().includes("data") ||
-        input.toLowerCase().includes("fetch");
-
-      // Check if the input requires dependency installation
-      const needsDependencies =
-        input.toLowerCase().includes("install") ||
-        input.toLowerCase().includes("dependency") ||
-        input.toLowerCase().includes("package");
-
-      let enhancedPrompt = input;
-
-      // Add enhancement instructions
-      enhancedPrompt +=
-        "\n\nAdditional requirements: Create a modern, visually stunning UI with glass morphism effects, gradients, and subtle animations. Ensure all images load properly using reliable Unsplash URLs. Make the design production-ready and error-free.";
-
-      // If web browsing is needed
-      if (needsWebBrowsing && capabilities[0].active) {
+      const needsWebBrowsing = /browse|search|look up/i.test(input);
+      const needsAPI = /api|data|fetch/i.test(input);
+      const needsDependencies = /install|dependency|package/i.test(input);
+      let enhancedPrompt = `${input}\n\nAdditional requirements: Create a modern, visually stunning UI with glassmorphism effects, gradients, and subtle animations. Ensure all images load properly using reliable Unsplash URLs. Make the design production-ready and error-free.`;
+      if (needsWebBrowsing && capabilities[0].active)
         toast.info("Web browsing capability activated", {
           icon: <Globe className="w-4 h-4" />,
         });
-        // In a real implementation, this would integrate with a web browsing API
-      }
-
-      // If API integration is needed
-      if (needsAPI && capabilities[1].active) {
+      if (needsAPI && capabilities[1].active)
         toast.info("API integration capability activated", {
           icon: <Code className="w-4 h-4" />,
         });
-        // In a real implementation, this would handle API integration
-      }
-
-      // If dependency installation is needed
-      if (needsDependencies && capabilities[2].active) {
+      if (needsDependencies && capabilities[2].active)
         toast.info("Dependency management capability activated", {
           icon: <Package className="w-4 h-4" />,
         });
-        // In a real implementation, this would handle dependency installation
-      }
-
-      const msg = {
-        role: "user",
-        content: enhancedPrompt,
-      };
-
+      const msg = { role: "user", content: enhancedPrompt };
       setMessages(msg);
-
-      // Check if setIsGenerating is a function before calling it
-      if (typeof setIsGenerating === "function") {
-        setIsGenerating(true);
-      }
-
-      // Create workspace without the metadata field that's causing the error
+      if (typeof setIsGenerating === "function") setIsGenerating(true);
       const workspaceId = await CreateWorkspace({
         user: userDetail._id,
         messages: [msg],
       });
-
-      router.push("/workspace/" + workspaceId);
+      router.push(`/workspace/${workspaceId}`);
     } catch (error) {
       console.error("Generation error:", error);
       toast.error("Failed to generate content", {
@@ -251,11 +163,13 @@ function Hero() {
     }
   };
 
-  // Toggle capability status
+  // Toggle Capability
   const toggleCapability = (index) => {
-    const newCapabilities = [...capabilities];
-    newCapabilities[index].active = !newCapabilities[index].active;
-    setCapabilities(newCapabilities);
+    setCapabilities((prev) =>
+      prev.map((cap, i) =>
+        i === index ? { ...cap, active: !cap.active } : cap
+      )
+    );
   };
 
   return (
@@ -263,11 +177,11 @@ function Hero() {
       ref={containerRef}
       className="min-h-[90vh] flex flex-col items-center justify-center p-6 relative overflow-hidden"
     >
-      {/* Dynamic Background Layer */}
+      {/* Dynamic Background with Optimized Image */}
       <div className="absolute inset-0 z-0">
         {backgroundImage && (
           <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-slate-900/90 to-indigo-950/80">
-            <img
+            <OptimizedImage
               src={backgroundImage}
               alt="Abstract background"
               className="w-full h-full object-cover mix-blend-overlay opacity-50"
@@ -275,8 +189,7 @@ function Hero() {
                 animation: "slowPulse 15s ease-in-out infinite",
                 filter: "blur(8px)",
               }}
-              loading="eager"
-              fetchPriority="high"
+              priority
             />
           </div>
         )}
@@ -303,7 +216,7 @@ function Hero() {
         ))}
       </div>
 
-      {/* Floating Elements - Decorative UI Elements */}
+      {/* Decorative Floating Elements */}
       <div className="absolute top-20 right-10 z-5">
         <motion.div
           className="w-44 h-44 rounded-full bg-gradient-to-r from-blue-500/30 to-purple-600/30 filter blur-3xl"
@@ -312,11 +225,7 @@ function Hero() {
             scale: [1, 1.05, 1],
             opacity: [0.5, 0.7, 0.5],
           }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
       <div className="absolute bottom-20 left-10 z-5">
@@ -386,7 +295,6 @@ function Hero() {
             {Lookup.HERO_HEADING}
           </span>
         </motion.h2>
-
         <motion.p
           className="text-xl text-slate-300/90 text-center max-w-xl"
           initial={{ opacity: 0 }}
@@ -396,7 +304,7 @@ function Hero() {
           {Lookup.HERO_DESC}
         </motion.p>
 
-        {/* Advanced Capabilities */}
+        {/* Capabilities */}
         <motion.div
           className="flex flex-wrap justify-center gap-2 w-full"
           initial={{ opacity: 0, y: 10 }}
@@ -416,9 +324,7 @@ function Hero() {
               {capability.icon}
               {capability.label}
               <div
-                className={`w-3 h-3 rounded-full ml-1 ${
-                  capability.active ? "bg-green-400" : "bg-slate-600"
-                }`}
+                className={`w-3 h-3 rounded-full ml-1 ${capability.active ? "bg-green-400" : "bg-slate-600"}`}
               ></div>
             </button>
           ))}
@@ -432,9 +338,7 @@ function Hero() {
           transition={{ duration: 0.8, delay: 1 }}
         >
           <div
-            className={`backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 ${
-              isExpanded ? "border-primary/20 shadow-lg shadow-primary/10" : ""
-            }`}
+            className={`backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20 ${isExpanded ? "border-primary/20 shadow-lg shadow-primary/10" : ""}`}
           >
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2 px-2">
@@ -457,14 +361,11 @@ function Hero() {
                     className="text-slate-400 hover:text-primary transition-colors"
                   >
                     <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 ${
-                        isExpanded ? "rotate-180" : ""
-                      }`}
+                      className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}
                     />
                   </button>
                 </div>
               </div>
-
               <textarea
                 ref={textareaRef}
                 placeholder={Lookup.INPUT_PLACEHOLDER}
@@ -473,7 +374,6 @@ function Hero() {
                 onFocus={() => setIsExpanded(true)}
                 className="w-full bg-transparent border-none outline-none resize-none min-h-[100px] text-white placeholder:text-slate-500"
               />
-
               {isExpanded && (
                 <motion.div
                   className="flex justify-between pt-2 border-t border-slate-700/50"
@@ -489,7 +389,6 @@ function Hero() {
                       <Search className="w-4 h-4" />
                     </button>
                   </div>
-
                   <span className="text-xs text-slate-500 self-center px-2">
                     {userDetail?.token || 0} tokens available
                   </span>
@@ -573,7 +472,7 @@ function Hero() {
           ))}
         </motion.div>
 
-        {/* "Powered by" Tag */}
+        {/* Powered By */}
         <motion.div
           className="text-xs text-slate-500 mt-8 flex items-center gap-1.5"
           initial={{ opacity: 0 }}
@@ -593,37 +492,30 @@ function Hero() {
         closeDialog={(v) => setOpenDialog(v)}
       />
 
-      {/* Global styles for animations */}
+      {/* Global Styles */}
       <style jsx global>{`
         :root {
           --primary-color: rgb(99, 102, 241);
           --primary-light: rgba(99, 102, 241, 0.2);
         }
-
         .text-primary {
           color: var(--primary-color);
         }
-
         .bg-primary {
           background-color: var(--primary-color);
         }
-
         .bg-primary\/20 {
           background-color: var(--primary-light);
         }
-
         .border-primary\/20 {
           border-color: rgba(99, 102, 241, 0.2);
         }
-
         .border-primary\/30 {
           border-color: rgba(99, 102, 241, 0.3);
         }
-
         .shadow-primary\/10 {
           --tw-shadow-color: rgba(99, 102, 241, 0.1);
         }
-
         @keyframes slowPulse {
           0%,
           100% {
@@ -635,7 +527,6 @@ function Hero() {
             filter: brightness(1.1);
           }
         }
-
         @keyframes gradientFlow {
           0% {
             background-position: 0% 50%;
@@ -647,7 +538,6 @@ function Hero() {
             background-position: 0% 50%;
           }
         }
-
         .text-gradient {
           background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
           background-size: 200% auto;
