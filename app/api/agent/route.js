@@ -137,7 +137,7 @@ export async function POST(request) {
           maxIterations: 30, // Increase iterations for complex tasks
           debugMode: true, // Enable debug mode
           model: "claude-3-5-sonnet-20241022", // Explicitly set the model
-          systemPrompt: `You are Dumpling, an elite autonomous web development assistant that creates visually stunning, modern websites with React, Next.js, and Tailwind CSS. You excel at:
+          systemPrompt: `You are Frodo, an elite autonomous web development assistant that creates visually stunning, modern websites with React, Next.js, and Tailwind CSS. You excel at:
 
 1. Creating exceptional UI/UX designs that are visually striking and intuitive
 2. Implementing 3D elements and animations that create immersive experiences

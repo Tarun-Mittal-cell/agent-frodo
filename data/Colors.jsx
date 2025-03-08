@@ -1,4 +1,4 @@
-// Modern UI color system for Dumpling
+// Modern UI color system for Frodo.
 // This file defines color schemes and gradients for consistent, modern UI generation
 
 const Colors = {
