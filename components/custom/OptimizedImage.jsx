@@ -1,203 +1,151 @@
-"use client";
+// context/UserDetailContext.jsx
+"use client"; // Mark as client-side component for React hooks
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import { Loader2 } from "lucide-react";
-import ImageUtils from "@/lib/ImageUtils";
+import React, { createContext, useState, useEffect, useCallback } from "react"; // Core React imports
+import { useQuery, useMutation } from "convex/react"; // Convex hooks for data operations
+import { api } from "../../convex/_generated/api"; // Adjusted path based on directory structure
+import { toast } from "sonner"; // Notification library for user feedback
+import { useAuth } from "../../hooks/useAuth"; // Adjusted path based on directory structure
 
 /**
- * OptimizedImage - A professional Next.js Image wrapper with bullet-proof reliability
- * - Enhanced error handling with multiple fallbacks
- * - Loading states with smooth transitions
- * - Support for regular images, avatars, and category-based images
- * - Built-in accessibility and performance optimizations
+ * @typedef {Object} UserDetail - Defines the structure of user data
+ * @property {string} _id - Unique Convex user ID
+ * @property {string} name - User's full name
+ * @property {string} email - User's email address
+ * @property {string} picture - URL to user's profile picture
+ * @property {number} token - User's token balance for app features
+ * @property {string} uid - Google OAuth user ID (sub)
+ * @property {number} _creationTime - Timestamp of user creation
  */
-const OptimizedImage = ({
-  src,
-  alt = "Image",
-  width,
-  height,
-  className = "",
-  priority = false,
-  sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
-  objectFit = "cover",
-  objectPosition = "center",
-  style = {},
-  isAvatar = false,
-  avatarName = "",
-  category = "",
-  fallbackSrc,
-  showLoadingIndicator = true,
-  quality = 80,
-  ...rest
-}) => {
-  // Consolidated state for image data
-  const [imageData, setImageData] = useState({
-    src: src || "",
-    fallbacks: [],
-    currentFallbackIndex: 0,
-    isLoading: true,
-    isError: false,
-    dimensions: { width, height },
-  });
+const UserDetail = {};
 
-  const shouldFill = !width || !height;
+/**
+ * UserDetailContext provides user management functionality across the app.
+ * @type {React.Context<{
+ *   userDetail: UserDetail | null,
+ *   isLoading: boolean,
+ *   setUserDetail: React.Dispatch<React.SetStateAction<UserDetail | null>>,
+ *   updateToken: (newToken: number) => Promise<void>,
+ *   logout: () => void,
+ * }>}
+ */
+export const UserDetailContext = createContext({
+  userDetail: null, // Default user data
+  isLoading: false, // Default loading state
+  setUserDetail: () => {}, // Default setter function
+  updateToken: async () => {}, // Default token update function
+  logout: () => {}, // Default logout function
+});
 
-  // Initialize image source and fallbacks
+/**
+ * UserDetailProvider manages user state and Convex interactions.
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components to render
+ * @returns {JSX.Element} Provider component
+ */
+export function UserDetailProvider({ children }) {
+  const [userDetail, setUserDetail] = useState(null); // State for user details
+  const [isLoading, setIsLoading] = useState(true); // Loading state for UI feedback
+
+  // Retrieve authentication state from useAuth hook
+  const { user, loading: authLoading, logout: authLogout } = useAuth();
+  const uid = user?.uid || null; // Extract Google UID or null if not authenticated
+
+  // Fetch user data from Convex
+  const userData = useQuery(api.users.GetUserByUid, uid ? { uid } : "skip"); // Skip if no UID
+
+  // Mutation to create a new user in Convex if not found
+  const createUser = useMutation(api.users.CreateUser);
+
+  // Sync user data and handle new user creation
   useEffect(() => {
-    let isMounted = true;
-
-    const initializeImage = async () => {
-      let initialSrc = src;
-      let initialFallbacks = [];
-      let updatedDimensions = { width, height };
-
-      try {
-        if (isAvatar) {
-          const name = avatarName || alt || "User";
-          const avatarData = ImageUtils.getAvatar(name, { size: width || 200 });
-          initialSrc = avatarData.url;
-          initialFallbacks = avatarData.fallbacks || [];
-          updatedDimensions = {
-            width: avatarData.width || 200,
-            height: avatarData.height || 200,
-          };
-        } else if (category) {
-          const imageData = await ImageUtils.getOptimizedImage(category, {
-            width,
-            height,
+    if (authLoading) {
+      setIsLoading(true); // Set loading during auth check
+    } else if (uid && userData) {
+      // User exists in Convex, update local state
+      setUserDetail({
+        _id: userData._id,
+        name: userData.name || "Guest",
+        email: userData.email || "",
+        picture: userData.picture || "https://via.placeholder.com/35?text=User",
+        token: userData.token ?? 50000, // Default token if undefined
+        uid: userData.uid,
+        _creationTime: userData._creationTime || Date.now(),
+      });
+      setIsLoading(false);
+    } else if (uid && userData === null) {
+      // User authenticated but not in Convex, create new user
+      const createNewUser = async () => {
+        try {
+          await createUser({
+            name: user.name || "Guest",
+            email: user.email || "",
+            picture: user.picture || "https://via.placeholder.com/35?text=User",
+            uid: uid,
           });
-          initialSrc = imageData.url;
-          initialFallbacks = imageData.fallbacks || [
-            ImageUtils.getFallbackImage(category).url,
-          ];
-        } else if (src) {
-          initialSrc = src;
-          initialFallbacks = fallbackSrc ? [fallbackSrc] : [];
-        } else {
-          const defaultImage = ImageUtils.getFallbackImage("default");
-          initialSrc = defaultImage.url;
-          initialFallbacks = [defaultImage.url];
+          toast.success("User account created successfully."); // Success feedback
+        } catch (error) {
+          console.error("Error creating user in Convex:", error);
+          toast.error("Failed to initialize user account."); // Error feedback
+          setUserDetail({
+            _id: "guest",
+            name: "Guest",
+            email: "",
+            picture: "https://via.placeholder.com/35?text=User",
+            token: 50000,
+            uid: uid || "",
+            _creationTime: Date.now(),
+          });
+          setIsLoading(false);
         }
-
-        // Add robust generic fallbacks
-        initialFallbacks.push(
-          `https://ui-avatars.com/api/?name=${encodeURIComponent(alt)}&size=256&background=random`,
-          `https://picsum.photos/${width || 800}/${height || 600}?random=${Math.random()}`,
-          `https://via.placeholder.com/${width || 800}x${height || 600}?text=${encodeURIComponent(alt)}`,
-          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" // Transparent pixel
-        );
-      } catch (error) {
-        console.error("Error initializing image:", error);
-        initialSrc =
-          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-        initialFallbacks = [];
-      }
-
-      if (isMounted) {
-        setImageData({
-          src: initialSrc,
-          fallbacks: initialFallbacks,
-          currentFallbackIndex: 0,
-          isLoading: true,
-          isError: false,
-          dimensions: updatedDimensions,
-        });
-      }
-    };
-
-    initializeImage();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [src, isAvatar, avatarName, alt, category, fallbackSrc, width, height]);
-
-  // Handle successful image load
-  const handleLoadingComplete = () => {
-    setImageData((prev) => ({ ...prev, isLoading: false }));
-  };
-
-  // Handle image loading error with cascading fallbacks
-  const handleError = () => {
-    setImageData((prev) => {
-      const nextIndex = prev.currentFallbackIndex + 1;
-      if (nextIndex < prev.fallbacks.length) {
-        return {
-          ...prev,
-          src: prev.fallbacks[nextIndex],
-          currentFallbackIndex: nextIndex,
-          isError: true,
-        };
-      }
-      return {
-        ...prev,
-        src: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-        isError: true,
-        isLoading: false,
       };
-    });
-  };
+      createNewUser();
+    } else if (!uid) {
+      // No authenticated user, clear state
+      setUserDetail(null);
+      setIsLoading(false);
+    }
+  }, [uid, userData, authLoading, user, createUser]); // Dependency array for useEffect
 
-  // Calculate aspect ratio for responsive layout
-  const aspectRatio =
-    imageData.dimensions.width && imageData.dimensions.height
-      ? imageData.dimensions.width / imageData.dimensions.height
-      : undefined;
+  // Mutation to update user token in Convex
+  const updateUserToken = useMutation(api.users.UpdateToken);
 
-  // Build image classes dynamically
-  const imageClasses = [
-    imageData.isError ? "opacity-80" : "",
-    `object-${objectFit}`,
-    imageData.isLoading
-      ? "opacity-0"
-      : "opacity-100 transition-opacity duration-300",
-    isAvatar ? "rounded-full" : "",
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  return (
-    <div
-      className={`relative overflow-hidden ${shouldFill ? "w-full h-full" : ""}`}
-      style={{
-        aspectRatio,
-        ...style,
-      }}
-    >
-      {/* Loading indicator */}
-      {imageData.isLoading && showLoadingIndicator && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 bg-opacity-50 dark:bg-opacity-50">
-          <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-        </div>
-      )}
-
-      {/* Next.js Image component */}
-      <Image
-        src={imageData.src}
-        alt={alt}
-        fill={shouldFill}
-        width={shouldFill ? undefined : imageData.dimensions.width}
-        height={shouldFill ? undefined : imageData.dimensions.height}
-        priority={priority}
-        sizes={sizes}
-        onLoadingComplete={handleLoadingComplete}
-        onError={handleError}
-        className={imageClasses}
-        style={{
-          objectPosition,
-          ...(imageData.isError &&
-          imageData.currentFallbackIndex >= imageData.fallbacks.length
-            ? { filter: "grayscale(0.5)" }
-            : {}),
-        }}
-        quality={quality}
-        loading={priority ? "eager" : "lazy"}
-        {...rest}
-      />
-    </div>
+  // Callback to update token with error handling
+  const updateToken = useCallback(
+    async (newToken) => {
+      if (!userDetail?._id || userDetail._id === "guest") {
+        toast.error("No user data available to update tokens.");
+        return;
+      }
+      try {
+        await updateUserToken({
+          userId: userDetail._id,
+          token: newToken,
+        });
+        setUserDetail((prev) => (prev ? { ...prev, token: newToken } : prev));
+        toast.success("Tokens updated successfully.");
+      } catch (error) {
+        console.error("Error updating token in Convex:", error);
+        toast.error("Failed to update tokens. Please try again.");
+      }
+    },
+    [userDetail?._id, updateUserToken]
   );
-};
 
-export default OptimizedImage;
+  // Callback to handle logout
+  const logout = useCallback(() => {
+    authLogout();
+    setUserDetail(null);
+    setIsLoading(false);
+    toast.info("Logged out successfully.");
+  }, [authLogout]);
+
+  // Render the provider with context value
+  return (
+    <UserDetailContext.Provider
+      value={{ userDetail, isLoading, setUserDetail, updateToken, logout }}
+    >
+      {children}
+    </UserDetailContext.Provider>
+  );
+}

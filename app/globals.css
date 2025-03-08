@@ -2,9 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+/* Define custom CSS variables */
 @layer base {
   :root {
-    --background: 0 0% 0%; /* Changed to black */
+    --background: 0 0% 0%; /* Black background */
     --foreground: 0 0% 98%;
     --card: 240 20% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -24,9 +28,12 @@
     --input: 240 20% 14.9%;
     --ring: 252 100% 69%;
     --radius: 0.5rem;
+    --font-inter: "Inter", sans-serif;
+    --font-jetbrains-mono: "JetBrains Mono", monospace;
   }
 }
 
+/* Base styles */
 @layer base {
   * {
     @apply border-border;
@@ -34,9 +41,26 @@
   body {
     @apply bg-background text-foreground;
     background-attachment: fixed;
+    font-family: var(--font-inter);
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold leading-tight;
+  }
+  p {
+    @apply leading-relaxed;
+  }
+  code {
+    font-family: var(--font-jetbrains-mono);
+    @apply text-sm bg-muted p-1 rounded;
   }
 }
 
+/* Custom utilities */
 @layer utilities {
   .glass {
     @apply bg-secondary/30 backdrop-blur-md border border-white/10;
@@ -47,6 +71,39 @@
   }
 
   .hover-glow {
-    @apply transition-all duration-300 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:border-purple-500/50;
+    @apply transition duration-300 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:border-purple-500/50;
+  }
+
+  /* Typography utilities */
+  .text-heading {
+    @apply text-3xl md:text-4xl font-bold text-foreground;
+  }
+
+  .text-subheading {
+    @apply text-xl md:text-2xl font-medium text-muted-foreground;
+  }
+
+  .text-body {
+    @apply text-base leading-relaxed text-foreground;
+  }
+
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
+  }
+
+  .btn-primary {
+    @apply bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-blue-700 transition duration-200 px-4 py-2 rounded-md;
+  }
+
+  .btn-outline {
+    @apply border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)] transition duration-200 px-4 py-2 rounded-md;
+  }
+
+  .image-gallery {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4;
+  }
+
+  .smooth-transition {
+    @apply transition duration-300 ease-in-out;
   }
 }

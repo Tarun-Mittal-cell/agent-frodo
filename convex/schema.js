@@ -7,8 +7,9 @@ export default defineSchema({
     email: v.string(),
     picture: v.string(),
     uid: v.string(),
-    token: v.optional(v.number()),
-  }),
+    token: v.number(),
+  }).index("by_uid", ["uid"]),
+
   workspace: defineTable({
     createdAt: v.optional(v.number()), // Make it optional to handle both cases
     messages: v.any(), // JSON OBJECT
