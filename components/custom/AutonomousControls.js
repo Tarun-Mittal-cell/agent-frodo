@@ -1,3 +1,4 @@
+"use client";
 // components/custom/AutonomousControls.js
 // UI component for controlling the autonomous agent
 
@@ -10,14 +11,14 @@ import {
   CheckCircle,
   Terminal,
 } from "lucide-react";
-import AutonomousAgent from "../../lib/AutonomousAgent";
 
 /**
  * AutonomousControls component provides a UI for controlling the autonomous agent
- * and visualizing its progress.
+ * and visualizing its progress via API routes.
  */
 const AutonomousControls = ({ apiKey, onResult }) => {
-  const [agent, setAgent] = useState(null);
+  const [agentId, setAgentId] = useState(null);
+  const [taskId, setTaskId] = useState(null);
   const [task, setTask] = useState("");
   const [status, setStatus] = useState("idle"); // idle, connecting, running, completed, error
   const [isInitialized, setIsInitialized] = useState(false);
@@ -26,6 +27,7 @@ const AutonomousControls = ({ apiKey, onResult }) => {
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
+  const [statusPollingInterval, setStatusPollingInterval] = useState(null);
 
   // Initialize the agent when the component mounts or apiKey changes
   useEffect(() => {
@@ -36,22 +38,28 @@ const AutonomousControls = ({ apiKey, onResult }) => {
       setMessage("Connecting to Claude API...");
 
       try {
-        const newAgent = new AutonomousAgent();
-
-        const connectionResult = await newAgent.initialize(apiKey, {
-          onProgress: handleProgress,
-          onComplete: handleComplete,
-          onError: handleError,
+        // Initialize the agent via API route
+        const response = await fetch("/api/agent", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "initialize",
+            apiKey,
+          }),
         });
 
-        if (connectionResult.success) {
-          setAgent(newAgent);
+        const data = await response.json();
+
+        if (data.success) {
+          setAgentId(data.agentId);
           setIsInitialized(true);
           setStatus("idle");
           setMessage("Connected to Claude API. Ready to start tasks.");
         } else {
           setStatus("error");
-          setMessage(`Connection failed: ${connectionResult.message}`);
+          setMessage(`Connection failed: ${data.message}`);
         }
       } catch (error) {
         setStatus("error");
@@ -60,38 +68,100 @@ const AutonomousControls = ({ apiKey, onResult }) => {
     };
 
     initializeAgent();
+
+    // Cleanup status polling on unmount
+    return () => {
+      if (statusPollingInterval) {
+        clearInterval(statusPollingInterval);
+      }
+    };
   }, [apiKey]);
 
-  // Handle progress updates from the agent
-  const handleProgress = (progressData) => {
-    setStatus(progressData.status);
-    setMessage(progressData.message);
-    setProgress(progressData.progress || 0);
-  };
+  // Start polling for task status when a task is running
+  useEffect(() => {
+    if (status === "running" && taskId) {
+      // Clear any existing interval
+      if (statusPollingInterval) {
+        clearInterval(statusPollingInterval);
+      }
 
-  // Handle task completion
-  const handleComplete = (completionData) => {
-    setStatus("completed");
-    setMessage("Task completed successfully");
-    setProgress(100);
-    setResult(completionData);
-    setHistory(completionData.history || []);
+      // Set up polling for status updates
+      const interval = setInterval(pollTaskStatus, 2000);
+      setStatusPollingInterval(interval);
 
-    if (onResult) {
-      onResult(completionData);
+      // Initial status check
+      pollTaskStatus();
+    } else if (status !== "running" && statusPollingInterval) {
+      // Clear interval when not running
+      clearInterval(statusPollingInterval);
+      setStatusPollingInterval(null);
     }
-  };
 
-  // Handle errors
-  const handleError = (error) => {
-    setStatus("error");
-    setMessage(`Error: ${error.message}`);
-    setProgress(0);
+    return () => {
+      if (statusPollingInterval) {
+        clearInterval(statusPollingInterval);
+      }
+    };
+  }, [status, taskId]);
+
+  // Poll for task status
+  const pollTaskStatus = async () => {
+    if (!taskId) return;
+
+    try {
+      const response = await fetch("/api/agent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "status",
+          taskId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.status) {
+        const taskData = data.status;
+
+        // Update state based on task data
+        setStatus(taskData.status);
+        setProgress(taskData.progress || 0);
+        setMessage(taskData.message || `Status: ${taskData.status}`);
+
+        if (taskData.history) {
+          setHistory(taskData.history);
+        }
+
+        // Handle completion
+        if (taskData.status === "completed" || taskData.status === "error") {
+          if (statusPollingInterval) {
+            clearInterval(statusPollingInterval);
+            setStatusPollingInterval(null);
+          }
+
+          if (taskData.result) {
+            setResult(taskData.result);
+            if (onResult) {
+              onResult(taskData.result);
+            }
+          }
+
+          if (taskData.error) {
+            setStatus("error");
+            setMessage(`Error: ${taskData.error.message || "Unknown error"}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error polling task status:", error);
+    }
   };
 
   // Start a new task
   const startTask = async () => {
-    if (!isInitialized || !task) return;
+    if (!isInitialized || !task || !agentId) return;
 
     setStatus("running");
     setMessage("Starting task...");
@@ -99,7 +169,28 @@ const AutonomousControls = ({ apiKey, onResult }) => {
     setResult(null);
 
     try {
-      await agent.startTask(task);
+      const response = await fetch("/api/agent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "start",
+          agentId,
+          task,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setTaskId(data.taskId);
+        setStatus("running");
+        setMessage(`Task started with ID: ${data.taskId}`);
+      } else {
+        setStatus("error");
+        setMessage(`Failed to start task: ${data.message}`);
+      }
     } catch (error) {
       setStatus("error");
       setMessage(`Failed to start task: ${error.message}`);
@@ -107,13 +198,30 @@ const AutonomousControls = ({ apiKey, onResult }) => {
   };
 
   // Stop the current task
-  const stopTask = () => {
-    if (!isInitialized || status !== "running") return;
+  const stopTask = async () => {
+    if (!isInitialized || status !== "running" || !taskId) return;
 
     try {
-      agent.stopTask();
-      setStatus("idle");
-      setMessage("Task stopped by user");
+      const response = await fetch("/api/agent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "stop",
+          taskId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setStatus("idle");
+        setMessage("Task stopped by user");
+      } else {
+        setStatus("error");
+        setMessage(`Failed to stop task: ${data.message}`);
+      }
     } catch (error) {
       setStatus("error");
       setMessage(`Failed to stop task: ${error.message}`);
@@ -129,6 +237,7 @@ const AutonomousControls = ({ apiKey, onResult }) => {
         return "bg-amber-500";
       case "running":
       case "processing":
+      case "starting":
       case "started":
         return "bg-blue-500";
       case "completed":
