@@ -8,7 +8,7 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
+    unique: true, // This sets an index automatically
   },
   picture: {
     type: String,
@@ -31,9 +31,11 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-// Add one index only to avoid duplicate warnings
+// Add only one index for uid
 UserSchema.index({ uid: 1 });
-UserSchema.index({ email: 1 }, { unique: true });
+
+// Remove this line to prevent duplicate index warnings:
+// UserSchema.index({ email: 1 }, { unique: true });
 
 // Use mongoose.models to prevent model recompilation error
 export default mongoose.models.User || mongoose.model("User", UserSchema);
