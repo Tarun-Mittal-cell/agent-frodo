@@ -26,8 +26,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import SignInDialog from "./SignInDialog";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useWorkspaces } from "@/hooks/use-workspaces";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import ImageUtils from "@/lib/ImageUtils";
@@ -53,6 +52,10 @@ function Hero() {
   const [typingEffect, setTypingEffect] = useState("");
   const [currentTypingIndex, setCurrentTypingIndex] = useState(0);
   const [showExamples, setShowExamples] = useState(false);
+
+  // MongoDB hooks
+  const { createWorkspace } = useWorkspaces(userDetail?._id);
+  const router = useRouter();
 
   // Capabilities with enhanced styling
   const [capabilities, setCapabilities] = useState([
@@ -126,10 +129,6 @@ function Hero() {
   const animationFrameRef = useRef(null);
   const timerRef = useRef(null);
   const typingIntervalRef = useRef(null);
-
-  // Mutations
-  const CreateWorkspace = useMutation(api.workspace.CreateWorkspace);
-  const router = useRouter();
 
   // Initialize component
   useEffect(() => {
@@ -373,12 +372,12 @@ function Hero() {
         setIsGenerating(true);
       }
 
-      // Create workspace
-      const workspaceId = await CreateWorkspace({
-        user: userDetail._id,
+      // Create workspace using MongoDB hook
+      const workspace = await createWorkspace({
         messages: [msg],
       });
 
+      const workspaceId = workspace._id;
       router.push("/workspace/" + workspaceId);
     } catch (error) {
       console.error("Generation error:", error);

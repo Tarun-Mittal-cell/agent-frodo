@@ -10,8 +10,6 @@ import Lookup from "@/data/Lookup";
 import axios from "axios";
 import { MessagesContext } from "@/context/MessagesContext";
 import Prompt from "@/data/Prompt";
-import { useConvex, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { useParams } from "next/navigation";
 import { Loader2Icon } from "lucide-react";
 import { countToken } from "./ChatView";
@@ -19,6 +17,8 @@ import { UserDetailContext } from "@/context/UserDetailContext";
 import SandpackPreviewClient from "./SandpackPreviewClient";
 import { ActionContext } from "@/context/ActionContext";
 import { toast } from "sonner";
+import { useWorkspaces } from "@/hooks/use-workspaces";
+import { useUser } from "@/hooks/use-users";
 
 function CodeView() {
   const { id } = useParams();
@@ -26,16 +26,17 @@ function CodeView() {
   const [activeTab, setActiveTab] = useState("code");
   const [files, setFiles] = useState(Lookup?.DEFAULT_FILE);
   const { messages, setMessages } = useContext(MessagesContext);
-  const UpdateFiles = useMutation(api.workspace.UpdateFiles);
-  const convex = useConvex();
   const [loading, setLoading] = useState(false);
-  const UpdateTokens = useMutation(api.users.UpdateToken);
   const { action, setAction } = useContext(ActionContext);
+
+  // MongoDB hooks
+  const { getWorkspace, updateFiles } = useWorkspaces(userDetail?._id);
+  const { updateToken } = useUser();
 
   // Fetch files when the workspace ID changes
   useEffect(() => {
     if (id) {
-      GetFiles();
+      getFiles();
     }
   }, [id]);
 
@@ -51,17 +52,15 @@ function CodeView() {
     if (messages?.length > 0) {
       const role = messages[messages.length - 1].role;
       if (role === "user") {
-        GenerateAiCode();
+        generateAiCode();
       }
     }
   }, [messages]);
 
-  const GetFiles = async () => {
+  const getFiles = async () => {
     setLoading(true);
     try {
-      const result = await convex.query(api.workspace.GetWorkspace, {
-        workspaceId: id,
-      });
+      const result = await getWorkspace(id);
       if (result?.fileData) {
         const mergedFiles = { ...Lookup.DEFAULT_FILE, ...result.fileData };
         setFiles(mergedFiles);
@@ -74,7 +73,7 @@ function CodeView() {
     }
   };
 
-  const GenerateAiCode = async () => {
+  const generateAiCode = async () => {
     setLoading(true);
     try {
       const PROMPT = JSON.stringify(messages) + " " + Prompt.CODE_GEN_PROMPT;
@@ -88,10 +87,7 @@ function CodeView() {
         setFiles(mergedFiles);
 
         // Update files in the database
-        await UpdateFiles({
-          workspaceId: id,
-          files: aiResp.files,
-        });
+        await updateFiles(id, aiResp.files);
 
         // Update user tokens
         if (userDetail?._id) {
@@ -99,10 +95,7 @@ function CodeView() {
             Number(userDetail?.token) -
             Number(countToken(JSON.stringify(aiResp)));
 
-          await UpdateTokens({
-            userId: userDetail._id,
-            token: token,
-          });
+          await updateToken(userDetail._id, token);
 
           setUserDetail((prev) => ({
             ...prev,

@@ -1,12 +1,10 @@
 "use client";
 import { MessagesContext } from "@/context/MessagesContext";
 import { UserDetailContext } from "@/context/UserDetailContext";
-import { api } from "@/convex/_generated/api";
 import Colors from "@/data/Colors";
 import Lookup from "@/data/Lookup";
 import Prompt from "@/data/Prompt";
 import axios from "axios";
-import { useConvex, useMutation } from "convex/react";
 import { ArrowRight, Link, Loader2Icon } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -14,6 +12,8 @@ import React, { useContext, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useSidebar } from "../ui/sidebar";
 import { toast } from "sonner";
+import { useWorkspaces } from "@/hooks/use-workspaces";
+import { useUser } from "@/hooks/use-users";
 
 export const countToken = (inputText) => {
   return inputText
@@ -24,38 +24,46 @@ export const countToken = (inputText) => {
 
 function ChatView() {
   const { id } = useParams();
-  const convex = useConvex();
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
   const { messages, setMessages } = useContext(MessagesContext);
-  const [userInput, setUserInput] = useState();
+  const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const UpdateMessages = useMutation(api.workspace.UpdateMessages);
   const { toggleSidebar } = useSidebar();
-  const UpdateTokens = useMutation(api.users.UpdateToken);
+
+  // MongoDB hooks
+  const { getWorkspace, updateMessages } = useWorkspaces(userDetail?._id);
+  const { updateToken } = useUser();
+
   useEffect(() => {
-    id && GetWorkspaceData();
+    id && getWorkspaceData();
   }, [id]);
+
   /**
    * Used to Get Workspace data using Workspace ID
    */
-  const GetWorkspaceData = async () => {
-    const result = await convex.query(api.workspace.GetWorkspace, {
-      workspaceId: id,
-    });
-    setMessages(result?.messages);
-    console.log(result);
+  const getWorkspaceData = async () => {
+    try {
+      const result = await getWorkspace(id);
+      if (result) {
+        setMessages(result.messages || []);
+        console.log("Workspace data:", result);
+      }
+    } catch (error) {
+      console.error("Error getting workspace data:", error);
+      toast.error("Failed to load workspace data");
+    }
   };
 
   useEffect(() => {
     if (messages?.length > 0) {
       const role = messages[messages?.length - 1].role;
-      if (role == "user") {
-        GetAiResponse();
+      if (role === "user") {
+        getAiResponse();
       }
     }
   }, [messages]);
 
-  const GetAiResponse = async () => {
+  const getAiResponse = async () => {
     setLoading(true);
     try {
       const PROMPT = JSON.stringify(messages) + Prompt.CHAT_PROMPT;
@@ -67,35 +75,42 @@ function ChatView() {
         role: "ai",
         content: result.data.result,
       };
-      setMessages((prev) => [...prev, aiResp]);
 
-      await UpdateMessages({
-        messages: [...messages, aiResp],
-        workspaceId: id,
-      });
+      const updatedMessages = [...messages, aiResp];
+      setMessages(updatedMessages);
 
-      const token =
-        Number(userDetail?.token) - Number(countToken(JSON.stringify(aiResp)));
+      // Update messages in database
+      await updateMessages(id, updatedMessages);
+
+      // Calculate and update token usage
+      const tokenUsage = countToken(JSON.stringify(aiResp));
+      const newTokenBalance = Number(userDetail?.token) - Number(tokenUsage);
+
       setUserDetail((prev) => ({
         ...prev,
-        token: token,
+        token: newTokenBalance,
       }));
-      //Update Tokens in Database
-      await UpdateTokens({
-        userId: userDetail?._id,
-        token: token,
-      });
-      setLoading(false);
-    } catch (e) {
+
+      // Update tokens in database
+      if (userDetail?._id) {
+        await updateToken(userDetail._id, newTokenBalance);
+      }
+    } catch (error) {
+      console.error("Error generating AI response:", error);
+      toast.error("Failed to generate response");
+    } finally {
       setLoading(false);
     }
   };
 
   const onGenerate = (input) => {
+    if (!input || input.trim() === "") return;
+
     if (userDetail?.token < 10) {
-      toast("You dont have enough token!");
+      toast.error("You don't have enough tokens!");
       return;
     }
+
     setMessages((prev) => [
       ...prev,
       {
@@ -118,9 +133,9 @@ function ChatView() {
                 backgroundColor: Colors.CHAT_BACKGROUND,
               }}
             >
-              {msg?.role == "user" && (
+              {msg?.role === "user" && userDetail?.picture && (
                 <Image
-                  src={userDetail?.picture}
+                  src={userDetail.picture}
                   alt="userImage"
                   width={35}
                   height={35}
@@ -147,9 +162,9 @@ function ChatView() {
 
       {/* Input Section  */}
       <div className="flex gap-2 items-end">
-        {userDetail && (
+        {userDetail?.picture && (
           <Image
-            src={userDetail?.picture}
+            src={userDetail.picture}
             className="rounded-full cursor-pointer"
             onClick={toggleSidebar}
             alt="user"
