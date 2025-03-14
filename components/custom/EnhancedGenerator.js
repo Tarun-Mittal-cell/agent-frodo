@@ -21,7 +21,7 @@ import Animations from "../../lib/Animations";
 
 /**
  * EnhancedGenerator component provides an advanced UI for generating
- * and previewing websites with Dumpling's enhanced AI capabilities.
+ * and previewing websites with Frodo's enhanced AI capabilities.
  */
 const EnhancedGenerator = ({ apiKey, defaultTheme = "dark" }) => {
   const [prompt, setPrompt] = useState("");

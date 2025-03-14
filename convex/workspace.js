@@ -1,3 +1,4 @@
+// convex/workspace.js
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
@@ -78,19 +79,104 @@ export const UpdateFiles = mutation({
 });
 
 /**
- * Get all workspaces for a user
+ * Get all workspaces for a user with pagination
+ * This replaces the old GetAllWorkspace that was hitting limits
  */
 export const GetAllWorkspace = query({
   args: {
     userId: v.id("users"),
+    cursor: v.optional(v.string()),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const result = await ctx.db
-      .query("workspace")
-      .filter((q) => q.eq(q.field("user"), args.userId))
-      .order("desc")
-      .collect();
+    const limit = args.limit || 20; // Default page size
 
-    return result;
+    // Create a query builder with the user filter and index
+    const queryBuilder = ctx.db
+      .query("workspace")
+      .withIndex("by_user", (q) => q.eq("user", args.userId))
+      .order("desc");
+
+    // Apply pagination with cursor-based approach
+    // The key issue: Convex expects 'numItems' in pagination options, not 'limit'
+    const paginationOpts = { numItems: limit };
+    if (args.cursor) {
+      paginationOpts.cursor = args.cursor;
+    }
+
+    const paginatedResults = await queryBuilder.paginate(paginationOpts);
+
+    return {
+      workspaces: paginatedResults.page,
+      continueCursor: paginatedResults.continueCursor,
+    };
+  },
+});
+
+/**
+ * Get lightweight workspace previews (without large message content)
+ * Use this for displaying lists of workspaces
+ */
+export const GetWorkspacePreviews = query({
+  args: {
+    userId: v.id("users"),
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 50;
+
+    // Create a query builder that only gets minimal fields
+    const queryBuilder = ctx.db
+      .query("workspace")
+      .withIndex("by_user", (q) => q.eq("user", args.userId))
+      .order("desc");
+
+    // Use field selection to avoid loading large message/file data
+    const projection = queryBuilder.select(["_id", "createdAt"]);
+
+    // Apply pagination - using numItems instead of limit
+    const paginationOpts = { numItems: limit };
+    if (args.cursor) {
+      paginationOpts.cursor = args.cursor;
+    }
+
+    const paginatedResults = await projection.paginate(paginationOpts);
+
+    return {
+      workspaces: paginatedResults.page,
+      continueCursor: paginatedResults.continueCursor,
+    };
+  },
+});
+
+/**
+ * Get a count of workspaces for a user
+ * Useful for UI displays without loading all workspace data
+ */
+export const CountWorkspaces = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const count = await ctx.db
+      .query("workspace")
+      .withIndex("by_user", (q) => q.eq("user", args.userId))
+      .count();
+
+    return count;
+  },
+});
+
+/**
+ * Delete a workspace
+ */
+export const DeleteWorkspace = mutation({
+  args: {
+    workspaceId: v.id("workspace"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.workspaceId);
+    return { success: true };
   },
 });
