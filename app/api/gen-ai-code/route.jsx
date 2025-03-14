@@ -6,27 +6,32 @@ export const maxDuration = 300;
 
 export async function POST(req) {
   const { prompt } = await req.json();
-
-  // Check if streaming is requested via query parameter
   const searchParams = req.nextUrl?.searchParams;
   const streamRequested = searchParams?.get("stream") === "true";
 
+  console.log("ANTHROPIC_API_KEY in use:", process.env.ANTHROPIC_API_KEY);
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error("ANTHROPIC_API_KEY is not set");
+    return NextResponse.json(
+      { error: "Server configuration error: Missing API key" },
+      { status: 500 }
+    );
+  }
+
   try {
     if (streamRequested) {
-      // Streaming implementation
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            // Use native fetch API to create a stream
             const response = await fetch(
               "https://api.anthropic.com/v1/messages",
               {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
-                  "X-API-Key": process.env.ANTHROPIC_API_KEY,
-                  "Anthropic-Version": "2023-06-01",
+                  "x-api-key": process.env.ANTHROPIC_API_KEY,
+                  "anthropic-version": "2023-06-01",
                 },
                 body: JSON.stringify({
                   model: "claude-3-opus-20240229",
@@ -38,16 +43,23 @@ export async function POST(req) {
             );
 
             if (!response.ok) {
-              throw new Error(`Anthropic API error: ${response.status}`);
+              const errorText = await response.text();
+              throw new Error(
+                `Anthropic API error: ${response.status} - ${errorText}`
+              );
             }
 
-            // Process Server-Sent Events (SSE) from Anthropic
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
 
             while (true) {
               const { done, value } = await reader.read();
-              if (done) break;
+              if (done) {
+                controller.enqueue(
+                  encoder.encode("event: done\ndata: Stream completed\n\n")
+                );
+                break;
+              }
 
               const chunk = decoder.decode(value);
               const lines = chunk
@@ -65,7 +77,12 @@ export async function POST(req) {
                       parsed.type === "content_block_delta" &&
                       parsed.delta?.text
                     ) {
-                      controller.enqueue(encoder.encode(parsed.delta.text));
+                      const eventData = JSON.stringify({
+                        text: parsed.delta.text,
+                      });
+                      controller.enqueue(
+                        encoder.encode(`data: ${eventData}\n\n`)
+                      );
                     }
                   } catch (e) {
                     console.error("Error parsing SSE data:", e);
@@ -77,12 +94,16 @@ export async function POST(req) {
             controller.close();
           } catch (error) {
             console.error("Streaming error:", error);
-            controller.error(error);
+            controller.enqueue(
+              encoder.encode(
+                `event: error\ndata: ${JSON.stringify({ message: error.message })}\n\n`
+              )
+            );
+            controller.close();
           }
         },
       });
 
-      // Return the stream with appropriate headers
       return new NextResponse(stream, {
         headers: {
           "Content-Type": "text/event-stream",
@@ -91,13 +112,12 @@ export async function POST(req) {
         },
       });
     } else {
-      // Traditional non-streaming implementation (compatible with existing code)
       const result = await GenAiCode.sendMessage(prompt);
       const resp = result.response.text();
       return NextResponse.json(JSON.parse(resp));
     }
   } catch (e) {
     console.error("Error in gen-ai-code:", e);
-    return NextResponse.json({ error: e.message });
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
